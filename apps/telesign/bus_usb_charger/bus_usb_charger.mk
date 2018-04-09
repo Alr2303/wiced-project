@@ -1,6 +1,6 @@
 NAME := App_bus_usb_charger
 
-COMMON := ../common
+COMMON := ../../eventloop/common
 
 $(NAME)_SOURCES    := bus_usb_charger_main.c \
 			bus_usb_console.c \

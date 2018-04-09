@@ -1,6 +1,6 @@
 NAME := App_led_gw
 
-COMMON := ../common
+COMMON := ../../eventloop/common
 
 $(NAME)_SOURCES    := main.c \
 			$(COMMON)/network.c \
@@ -27,8 +27,7 @@ $(NAME)_COMPONENTS += protocols/HTTP \
 	              utilities/command_console/dct
 
 GLOBAL_DEFINES     += MAC_ADDRESS_SET_BY_HOST \
-		      WICED_DCT_INCLUDE_BT_CONFIG \
-		      BT_CONFIG_APPLICATION_DEFINED
+		      WICED_DCT_INCLUDE_BT_CONFIG
 
 GLOBAL_DEFINES	   += TARGET_LED_GW
 
