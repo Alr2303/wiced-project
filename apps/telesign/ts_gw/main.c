@@ -242,7 +242,7 @@ void application_start(void)
 	a_eventloop_init(&evt);
 
 	a_sys_led_init(&led, &evt, 500, gpio_table, N_ELEMENT(gpio_table));
-	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 1024, 2);
+	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
 	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, SENSING_INTERVAL,
 			  sensor_process, send_telemetry_sensor, 0);
 	a_eventloop_register_timer(&evt, &timer_node, initial_led_blink_cb, 500, 0);
