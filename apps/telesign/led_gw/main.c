@@ -109,6 +109,7 @@ static sys_pwm_t pwm;
 static sys_button_t button;
 static sys_mqtt_t mqtt;
 static sys_worker_t worker;
+static wiced_worker_thread_t worker_thread;
 
 static char server[MAX_SERVER_NAME];
 static char device_token[MAX_DEVICE_TOKEN];
@@ -329,7 +330,8 @@ void application_start(void)
 	a_sys_button_init(&button, PLATFORM_BUTTON_3, &evt, EVENT_FAULT3_DET, fault_detect_fn, (void*)2);
 	a_sys_button_init(&button, PLATFORM_BUTTON_4, &evt, EVENT_FAULT4_DET, fault_detect_fn, (void*)3);
 
-	a_sys_worker_init(&worker, &evt, EVENT_SENSOR_FINISHED, SENSING_INTERVAL,
+	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 1024, 2);
+	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, SENSING_INTERVAL,
 			  sensor_process, send_telemetry_sensor, 0);
 	a_eventloop_register_timer(&evt, &timer_node, initial_led_blink_cb, 500, 0);
 
