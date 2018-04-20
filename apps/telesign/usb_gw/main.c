@@ -28,7 +28,7 @@
 #include "util.h"
 #include "json_parser.h"
 #include "device.h"
-
+#include "upgrade.h"
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -144,13 +144,41 @@ static int log_output_handler(WICED_LOG_LEVEL_T level, char *logmsg)
 
 static void mqtt_subscribe_cb_fn(sys_mqtt_t *s, wiced_mqtt_topic_msg_t *msg, void *arg)
 {
-#if 0
 	a_json_t json;
-	int entry[10];
+	int entry[14];
 	const char* val;
+
 	if (!a_sys_mqtt_is_rpc_topic(msg))
 		return;
-#endif
+
+	a_json_init(&json, (char*)msg->data, msg->data_len, entry, N_ELEMENT(entry), '\0');
+	a_json_append_str_sized(&json, (char*)msg->data, msg->data_len);
+	if (!a_json_is_good(&json))
+		return;
+
+	val = a_json_get_prop(&json, "method");
+	if (!val)
+		return;
+
+	if (strcmp(val, "firmware") == 0) {
+		const char* hostname;
+		const char* path;
+		const char* md5;
+		int port;
+		wiced_bool_t https;
+
+		hostname = a_json_get_prop(&json, "hostname");
+		path = a_json_get_prop(&json, "path");
+		md5 = a_json_get_prop(&json, "md5");
+		port = a_json_get_prop_int(&json, "port", 0, 65535);
+		https = a_json_get_prop_int(&json, "https", 0, 1);
+
+		wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Upgrade: %s:%s:%d/%s\n",
+			      https ? "https" : "http",
+			      hostname, port, path);
+
+		a_upgrade_try(https, hostname, port, path, md5, WICED_TRUE);
+	}
 }
 
 static void update_net_state_fn(wiced_bool_t net, wiced_bool_t mqtt, void *arg)
