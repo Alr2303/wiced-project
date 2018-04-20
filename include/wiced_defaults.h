@@ -168,7 +168,7 @@ extern "C"
 
 /************************************************************************
  * Application thread stack size */
-#define WICED_DEFAULT_APPLICATION_STACK_SIZE    (8192)
+#define WICED_DEFAULT_APPLICATION_STACK_SIZE    (10240)
 
 /************************************************************************
  * Soft AP Options */
