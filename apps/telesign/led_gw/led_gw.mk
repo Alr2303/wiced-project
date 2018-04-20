@@ -12,7 +12,8 @@ $(NAME)_SOURCES    := main.c \
 			$(COMMON)/sys_mqtt.c \
 			$(COMMON)/sys_worker.c \
 			$(COMMON)/json_parser.c \
-			$(COMMON)/device.c
+			$(COMMON)/device.c \
+			$(COMMON)/upgrade.c
 
 GLOBAL_INCLUDES += $(COMMON)
 $(NAME)_INCLUDES   += . \
