@@ -23,6 +23,7 @@ $(NAME)_INCLUDES   += . \
 
 $(NAME)_COMPONENTS += protocols/HTTP \
 		      protocols/MQTT \
+                      daemons/Gedday \
 		      utilities/wiced_log \
 		      utilities/command_console \
 	              utilities/command_console/wifi \
