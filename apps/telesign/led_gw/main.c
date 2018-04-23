@@ -30,6 +30,7 @@
 #include "json_parser.h"
 #include "device.h"
 #include "upgrade.h"
+#include "mqtt_thingsboard.h"
 
 #define MAX_FAULT_PORT		4
 
@@ -191,7 +192,7 @@ static void mqtt_subscribe_cb_fn(sys_mqtt_t *s, wiced_mqtt_topic_msg_t *msg, voi
 	int entry[14];
 	const char* val;
 
-	if (!a_sys_mqtt_is_rpc_topic(msg))
+	if (!a_sys_mqtt_tb_is_rpc_topic(msg))
 		return;
 
 	a_json_init(&json, (char*)msg->data, msg->data_len, entry, N_ELEMENT(entry), '\0');
@@ -238,8 +239,13 @@ static void mqtt_subscribe_cb_fn(sys_mqtt_t *s, wiced_mqtt_topic_msg_t *msg, voi
 	}
 }
 
-static void update_net_state_fn(wiced_bool_t net, wiced_bool_t mqtt, void *arg)
+static void update_net_state_fn(wiced_bool_t net, wiced_bool_t mqtt_state, void *arg)
 {
+	if (mqtt_state) {
+		a_sys_mqtt_tb_publish_version(&mqtt);
+		a_sys_mqtt_tb_subscribe(&mqtt);
+	}
+	
 	if (net) {
 		a_sys_led_set(&led, LED_WIFI_G, LED_BLINK);
 		a_sys_led_set(&led, LED_WIFI_R, LED_OFF);
@@ -247,7 +253,7 @@ static void update_net_state_fn(wiced_bool_t net, wiced_bool_t mqtt, void *arg)
 		a_sys_led_set(&led, LED_WIFI_G, LED_OFF);
 		a_sys_led_set(&led, LED_WIFI_R, LED_BLINK);
 	}		
-	if (mqtt) {
+	if (mqtt_state) {
 		a_sys_led_set(&led, LED_SERVER_G, LED_BLINK);
 		a_sys_led_set(&led, LED_SERVER_R, LED_OFF);
 	} else {
@@ -269,7 +275,7 @@ static wiced_result_t init_mqtt()
 	device_token[sizeof(device_token) - 1] = '\0';
 	wiced_dct_read_unlock(dct, WICED_FALSE);
 	a_sys_mqtt_init(&mqtt, &evt, server, WICED_FALSE, device_token,
-			"*.humminglab.io", mqtt_subscribe_cb_fn, update_net_state_fn, &mqtt);
+			"*.humminglab.io", mqtt_subscoribe_cb_fn, update_net_state_fn, &mqtt);
 	return WICED_SUCCESS;
 }
 

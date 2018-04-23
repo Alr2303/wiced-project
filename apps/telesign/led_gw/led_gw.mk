@@ -1,6 +1,7 @@
 NAME := App_led_gw
 
 COMMON := ../../eventloop/common
+LOCAL_COMMON := ../common
 
 $(NAME)_SOURCES    := main.c \
 			$(COMMON)/network.c \
@@ -10,6 +11,7 @@ $(NAME)_SOURCES    := main.c \
 			$(COMMON)/sys_pwm.c \
 			$(COMMON)/sys_button.c \
 			$(COMMON)/sys_mqtt.c \
+			$(LOCAL_COMMON)/mqtt_thingsboard.c \
 			$(COMMON)/sys_worker.c \
 			$(COMMON)/json_parser.c \
 			$(COMMON)/device.c \
@@ -17,7 +19,7 @@ $(NAME)_SOURCES    := main.c \
 
 GLOBAL_INCLUDES += $(COMMON)
 $(NAME)_INCLUDES   += . \
-		      $(COMMON)
+		      $(COMMON) $(LOCAL_COMMON)
 
 $(NAME)_COMPONENTS += protocols/HTTP \
 		      protocols/MQTT \

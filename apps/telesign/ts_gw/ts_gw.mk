@@ -1,6 +1,7 @@
 NAME := App_ts_gw
 
 COMMON := ../../eventloop/common
+LOCAL_COMMON := ../common
 
 $(NAME)_SOURCES    := main.c \
 			$(COMMON)/network.c \
@@ -8,6 +9,7 @@ $(NAME)_SOURCES    := main.c \
 			$(COMMON)/console.c \
 			$(COMMON)/sys_led.c \
 			$(COMMON)/sys_mqtt.c \
+			$(LOCAL_COMMON)/mqtt_thingsboard.c \
 			$(COMMON)/sys_worker.c \
 			$(COMMON)/sys_button.c \
 			$(COMMON)/json_parser.c \
@@ -16,7 +18,7 @@ $(NAME)_SOURCES    := main.c \
 
 GLOBAL_INCLUDES += $(COMMON)
 $(NAME)_INCLUDES   += . \
-		      $(COMMON)
+		      $(COMMON) $(LOCAL_COMMON)
 
 $(NAME)_COMPONENTS += protocols/HTTP \
 		      protocols/MQTT \
