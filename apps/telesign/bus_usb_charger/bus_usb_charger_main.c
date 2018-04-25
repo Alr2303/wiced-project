@@ -24,7 +24,6 @@
 #include "sys_led.h"
 #include "sys_pwm.h"
 #include "sys_button.h"
-#include "sys_mqtt.h"
 #include "sys_worker.h"
 #include "util.h"
 #include "json_parser.h"
@@ -32,6 +31,7 @@
 
 #include "bus_usb_charger_main.h"
 #include "bus_usb_console.h"
+#include "coap_daemon.h"
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -91,7 +91,6 @@ void net_init(void) {
 	wiced_dct_read_unlock(dct, WICED_FALSE);
 
 	a_network_init();
-	wiced_rtos_delay_milliseconds(1 * 1000);
 }
 
 static int log_output_handler(WICED_LOG_LEVEL_T level, char *log_msg)
@@ -99,25 +98,6 @@ static int log_output_handler(WICED_LOG_LEVEL_T level, char *log_msg)
 	write(STDOUT_FILENO, log_msg, strlen(log_msg));
 	return 0;
 }
-
-/*
-  static wiced_result_t init_mqtt()
-  {
-  app_dct_t* dct;
-
-  update_net_state_fn(WICED_FALSE, WICED_FALSE, NULL);
-
-  wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION, 0, sizeof(app_dct_t));
-  strncpy(server, dct->server, sizeof(server));
-  strncpy(device_token, dct->device_token, sizeof(device_token));
-  server[sizeof(server) - 1] = '\0';
-  device_token[sizeof(device_token) - 1] = '\0';
-  wiced_dct_read_unlock(dct, WICED_FALSE);
-  a_sys_mqtt_init(&mqtt, &evt, server, WICED_FALSE, device_token,
-  "*.humminglab.io", mqtt_subscribe_cb_fn, update_net_state_fn, &mqtt);
-  return WICED_SUCCESS;
-  }
-*/
 
 static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
@@ -145,7 +125,7 @@ static void initial_led_blink_cb(void *arg)
 	if (++cnt > 6) {
 		a_eventloop_deregister_timer(&evt, &timer_node);
 		led_all(led_all_on);
-		//init_mqtt();
+		coap_daemon_init();
 		return;
 	}
 	led_all((cnt % 2) ? led_all_off: led_all_on);
