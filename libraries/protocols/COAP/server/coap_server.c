@@ -436,6 +436,7 @@ static void coap_add_service( coap_service_t* new_service )
     wiced_coap_server_service_t* service = new_service->service;
 
     linked_list_insert_node_at_rear( &server->service_list, &service->this_node );
+    free( new_service );
 
 }
 
@@ -720,7 +721,7 @@ static wiced_result_t coap_server_receive_callback( wiced_udp_socket_t *socket, 
 wiced_result_t wiced_coap_server_add_service( wiced_coap_server_t* server, wiced_coap_server_service_t* service, char* service_name, wiced_coap_server_callback service_handler, wiced_coap_content_type_t content_type )
 {
     server_event_message_t current_event;
-    static coap_service_t new_service;
+    coap_service_t* new_service = malloc( sizeof(coap_service_t) );
     wiced_result_t result;
 
     wiced_assert( "bad arg", ( service_name != NULL ) && ( service_handler != NULL ));
@@ -745,11 +746,11 @@ wiced_result_t wiced_coap_server_add_service( wiced_coap_server_t* server, wiced
     service->callback = service_handler;
     service->content_type = content_type;
 
-    new_service.server = server;
-    new_service.service = service;
+    new_service->server = server;
+    new_service->service = service;
 
     current_event.event_type = COAP_ADD_SERVICE_EVENT;
-    current_event.data = (void*) &new_service;
+    current_event.data = (void*) new_service;
 
     wiced_rtos_push_to_queue( &server->event_queue, &current_event, WICED_NO_WAIT );
 
