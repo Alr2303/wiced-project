@@ -12,5 +12,6 @@ wiced_result_t coap_daemon_init(void);
 
 wiced_result_t coap_post_alive(wiced_bool_t reset);
 wiced_result_t coap_post_int(char* endpoint, int data);
-wiced_result_t coap_post_data(char* endpoint, void* data, size_t len);
+wiced_result_t coap_post_str(char* endpoint, char* data);
+wiced_result_t coap_post_data(char* path, char* data, size_t len);
 

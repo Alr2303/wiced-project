@@ -47,14 +47,21 @@ static wiced_result_t handle_update(void* context, wiced_coap_server_service_t* 
 wiced_result_t coap_post_alive(wiced_bool_t reset)
 {
 	char* payload = reset ? "reset" : "";
-	return coap_post_data("alive", payload, strlen(payload));
+	return coap_post_data("alive", payload, 0);
 }
 
 wiced_result_t coap_post_int(char* endpoint, int data)
 {
-	char buf[10];
-	sprintf(buf, "%d", data);
-	return coap_post_data(endpoint, buf, strlen(buf));
+	char buf[20];
+	sprintf(buf, "%s:%d", endpoint, data);
+	return coap_post_data(NULL, buf, 0);
+}
+
+wiced_result_t coap_post_str(char* endpoint, char* data)
+{
+	char buf[128];
+	sprintf(buf, "%s:%s", endpoint, data);
+	return coap_post_data(NULL, buf, 0);
 }
 
 static wiced_result_t coap_wait_for(wiced_coap_client_event_type_t event, uint32_t timeout)
@@ -68,18 +75,18 @@ static wiced_result_t coap_wait_for(wiced_coap_client_event_type_t event, uint32
 	return WICED_SUCCESS;
 }
 
-wiced_result_t coap_post_data(char* endpoint, void* data, size_t len)
+wiced_result_t coap_post_data(char* path, char* data, size_t len)
 {
 	wiced_coap_client_request_t request;
 
 	memset(&request, 0, sizeof(request));
 	request.payload_type = WICED_COAP_CONTENTTYPE_TEXT_PLAIN;
 	request.payload.data = (uint8_t*)data;
-	request.payload.len = len;
+	request.payload.len = len ? len : strlen(data);
 
-	wiced_coap_set_uri_path(&request.options, endpoint);
+	wiced_coap_set_uri_path(&request.options, path ? path : "server");
 
-	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sent Post: %s\n", endpoint);
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sent Post: %s - %s\n", path, data);
 	require_noerr(wiced_coap_client_post(&coap_client, &request, WICED_COAP_MSGTYPE_CON, host_ip, COAP_TARGET_PORT), _error);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Waiting Ack\n");
 	require_noerr(coap_wait_for(WICED_COAP_CLIENT_EVENT_TYPE_POSTED, WICED_COAP_TIMEOUT), _error);
