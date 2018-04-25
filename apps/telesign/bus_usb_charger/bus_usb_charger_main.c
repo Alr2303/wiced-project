@@ -28,6 +28,8 @@
 #include "util.h"
 #include "json_parser.h"
 #include "device.h"
+#include "upgrade.h"
+#include "assert_macros.h"
 
 #include "bus_usb_charger_main.h"
 #include "bus_usb_console.h"
@@ -54,7 +56,10 @@ static const command_t cons_commands[] = {
         CMD_TABLE_END
 };
 
+#define SENSING_INTERVAL	(30 * 1000)
+
 #define EVENT_USB_DET		(1 << 0)
+#define EVENT_SENSOR_FINISHED	(1 << 1)
 
 #define PWM_LED_MAX		100
 
@@ -74,8 +79,10 @@ static sys_led_t led;
 static sys_button_t button;
 static sys_pwm_t pwm_green;
 static sys_pwm_t pwm_red;
+static sys_worker_t worker;
+static wiced_worker_thread_t worker_thread;
 
-static eventloop_timer_node_t timer_node;
+static charger_state_t state;
 
 void net_init(void) {
 	app_dct_t* dct;
@@ -85,7 +92,6 @@ void net_init(void) {
 		return;
 
 	inited = WICED_TRUE;
-
 	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
 			    0, sizeof(app_dct_t));
 	wiced_dct_read_unlock(dct, WICED_FALSE);
@@ -99,10 +105,20 @@ static int log_output_handler(WICED_LOG_LEVEL_T level, char *log_msg)
 	return 0;
 }
 
+static wiced_result_t usb_post(void *arg)
+{
+	if (a_network_is_up()) {
+		require_noerr(coap_post_int("usb", state.usb), _err);
+	}
+_err:
+	return WICED_SUCCESS;
+}
+
 static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
 
+	state.usb = val;
 	if (val) {
 		a_sys_pwm_level(&pwm_green, 0);
 		a_sys_pwm_level(&pwm_red, PWM_LED_MAX);
@@ -110,54 +126,78 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 		a_sys_pwm_level(&pwm_green, PWM_LED_MAX);
 		a_sys_pwm_level(&pwm_red, 0);
 	}
-}
 
-static void led_all(const uint8_t *tbl)
-{
-	int i;
-	for (i = 0; i < N_ELEMENT(gpio_table); i++)
-		a_sys_led_set(&led, i, tbl[i]);
-}
-
-static void initial_led_blink_cb(void *arg)
-{
-	static int cnt;
-	if (++cnt > 6) {
-		a_eventloop_deregister_timer(&evt, &timer_node);
-		led_all(led_all_on);
-		coap_daemon_init();
-		return;
+	if (a_network_is_up()) {
+		wiced_rtos_send_asynchronous_event(&worker_thread, usb_post, 0);
 	}
-	led_all((cnt % 2) ? led_all_off: led_all_on);
+}
+
+static void update_sensor(void)
+{
+	uint16_t voltage, load;
+
+	voltage = a_dev_adc_get(WICED_ADC_1);
+	load = a_dev_adc_get(WICED_ADC_2);
+
+	state.voltage = (int)voltage;
+	state.load = (int)load;
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "ADC Voltage: %d, Load: %d\n", state.voltage, state.load);
+}
+
+static void dummy_process(void *arg)
+{
+}
+
+static void sensor_process(void *arg)
+{
+	update_sensor();
+
+	if (!a_network_is_up())
+		return;
+
+	require_noerr(coap_post_alive(false), _err);
+	require_noerr(coap_post_int("voltage", state.voltage), _err);
+	require_noerr(coap_post_int("load", state.load), _err);
+	require_noerr(coap_post_int("fail", state.fail), _err);
+_err:
+	return;
 }
 
 void application_start(void) {
 	wiced_result_t result;
 	WICED_LOG_LEVEL_T level = WICED_LOG_DEBUG0;
 
+	memset(&state, 0, sizeof(state));
+	state.allow_fast_charge = true;
+
 	wiced_init();
 
 	wiced_log_init(level, log_output_handler, NULL);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "USB Charger Version: v%s\n", fw_version);
-
+	a_set_allow_fast_charge(true);
 
 	result = command_console_init(STDIO_UART, sizeof(command_buffer), command_buffer,
 				      COMMAND_HISTORY_LENGTH, command_history_buffer, " ");
 	wiced_assert("Console Init Error", result == WICED_SUCCESS);
 	console_add_cmd_table(cons_commands);
 
-	a_dev_adc_init();
-
 	net_init();
+	a_dev_adc_init();
 	a_eventloop_init(&evt);
 	a_sys_led_init(&led, &evt, 500, gpio_table, N_ELEMENT(gpio_table));
-	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
 	a_sys_pwm_init(&pwm_green, &evt, WICED_PWM_1, 10, 100);
 	a_sys_pwm_init(&pwm_red, &evt, WICED_PWM_2, 10, 100);
 
-	a_sys_pwm_level(&pwm_green, PWM_LED_MAX);
+	usb_detect_fn(0, 0);
+	update_sensor();
 
-	a_eventloop_register_timer(&evt, &timer_node, initial_led_blink_cb, 500, 0);
+	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
+
+	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
+	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, SENSING_INTERVAL,
+			  sensor_process, dummy_process, 0);
+
+	coap_daemon_init();
 
 	printf("Start USB Charger\n");
 
@@ -166,10 +206,97 @@ void application_start(void) {
 	}
 }
 
-const char * a_fw_version(void) {
+const char * a_fw_version(void)
+{
 	return fw_version;
 }
 
-const char * a_fw_model(void) {
+const char * a_fw_model(void)
+{
 	return fw_model;
+}
+
+charger_state_t * a_get_charger_state(void)
+{
+	return &state;
+}
+
+void a_set_allow_fast_charge(wiced_bool_t enable)
+{
+	if (state.allow_fast_charge == enable)
+		return;
+
+	state.allow_fast_charge = enable;
+	if (enable) {
+		wiced_gpio_output_high(GPO_ENABLE_FAST_CHARGE);
+	} else {
+		wiced_gpio_output_low(GPO_ENABLE_FAST_CHARGE);
+	}
+
+	/* reset charger device */
+	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
+	wiced_rtos_delay_milliseconds(50);
+	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
+}
+
+static wiced_result_t upgrade_worker(void *arg)
+{
+	ota_result_t res;
+	update_info_t* info = arg;
+
+	if (!a_network_is_up())
+		return WICED_SUCCESS;
+
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Start Upgrade\n");
+	res = a_upgrade_try(WICED_FALSE, info->hostname, info->port, info->path, info->md5, WICED_TRUE);
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Upgrade Result: %d\n", res);
+
+	free(info);
+	return WICED_SUCCESS;
+}
+
+wiced_result_t a_upgrade_request(char* json_data, size_t len)
+{
+	a_json_t json;
+	const char *p;
+	int entry[14];
+	update_info_t* info = NULL;
+	char* buf = NULL;
+
+	info = malloc(sizeof(update_info_t));
+	buf = malloc(len + 1);
+	memset(info, 0, sizeof(update_info_t));
+
+	a_json_init(&json, (char*)buf, len + 1, entry, N_ELEMENT(entry), '\0');
+	a_json_append_str_sized(&json, (char*)json_data, len);
+	
+	p = a_json_get_prop(&json, "hostname");
+	require(p, _bad);
+	strcpy(info->hostname, p);
+	p = a_json_get_prop(&json, "path");
+	require(p, _bad);
+	strcpy(info->path, p);
+	p = a_json_get_prop(&json, "md5");
+	require(p, _bad);
+	strcpy(info->md5, p);
+	info->port = a_json_get_prop_int(&json, "port", 0, 65535);
+	require(info->port, _bad);
+	free(buf);
+
+	require(a_network_is_up(), _bad);
+	wiced_rtos_send_asynchronous_event(&worker_thread, upgrade_worker, info);
+
+	return WICED_SUCCESS;
+_bad:
+	if (buf)
+		free(buf);
+
+	if (info)
+		free(info);
+	return WICED_ERROR;
+}
+
+wiced_result_t a_asynchronous_event(event_handler_t function, void* arg)
+{
+	return wiced_rtos_send_asynchronous_event(&worker_thread, function, arg);
 }

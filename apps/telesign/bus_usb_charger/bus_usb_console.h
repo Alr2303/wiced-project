@@ -8,11 +8,9 @@
  */
 #pragma once
 
-int cmd_led(int argc, char* argv[]);
 int cmd_fast_charge(int argc, char* argv[]);
 int cmd_usb_detect(int argc, char* argv[]);
 
 #define BUS_USB_COMMANDS \
- { "led", cmd_led, 1, NULL, NULL, "1/0", "Power LED on/off" }, \
  { "fast_charge", cmd_fast_charge, 1, NULL, NULL, "1/0", "Enable Fast Charge" }, \
  { "usb_detect", cmd_usb_detect, 0, NULL, NULL, NULL, "USB Detect" },

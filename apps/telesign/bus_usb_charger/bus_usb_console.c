@@ -16,21 +16,6 @@
 #include "util.h"
 #include "device.h"
 
-int cmd_led(int argc, char* argv[])
-{
-	int val;
-	if (argc < 2)
-		return ERR_INSUFFICENT_ARGS;
-
-	val = !!atoi(argv[1]);
-	printf("Power LED: %d\n", val);
-	if (val)
-		wiced_gpio_output_low(USBCG_LED_POWER);
-	else
-		wiced_gpio_output_high(USBCG_LED_POWER);
-	return ERR_CMD_OK;
-}
-
 int cmd_fast_charge(int argc, char* argv[])
 {
 	int val;
@@ -43,6 +28,11 @@ int cmd_fast_charge(int argc, char* argv[])
 		wiced_gpio_output_high(GPO_ENABLE_FAST_CHARGE);
 	else
 		wiced_gpio_output_low(GPO_ENABLE_FAST_CHARGE);
+
+	/* reset charger device */
+	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
+	wiced_rtos_delay_milliseconds(50);
+	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
 	return ERR_CMD_OK;
 }
 
