@@ -56,9 +56,11 @@ extern "C"
  * Note : Please update MAX_HEADER_SIZE if you are adding any new option.
  */
 
+#ifndef COAP_MAX_HEADER_SIZE
 #define COAP_MAX_HEADER_SIZE             (4 + COAP_TOKEN_LENGTH + 3 + 4 + 255)  /* 274 */
 #define COAP_MAX_RETRANSMIT               4
 #define COAP_RESPONSE_TIME                2
+#endif
 /******************************************************
  *                   Enumerations
  ******************************************************/
