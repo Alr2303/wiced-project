@@ -14,7 +14,6 @@
 #include "console.h"
 #include "app_dct.h"
 #include "util.h"
-#include "sysloop.h"
 #include "device.h"
 
 int cmd_led(int argc, char* argv[])
