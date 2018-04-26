@@ -39,7 +39,7 @@ static wiced_result_t handle_version(void* context, wiced_coap_server_service_t*
 static wiced_result_t handle_fail(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_usb(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_voltage(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
-static wiced_result_t handle_load(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
+static wiced_result_t handle_current(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_fastcharge(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_update(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 
@@ -165,7 +165,7 @@ static wiced_result_t coap_init(void *arg)
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[1], "fail", handle_fail, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[2], "usb", handle_usb, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[3], "voltage", handle_voltage, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[4], "load", handle_load, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[4], "current", handle_current, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[5], "fastcharge", handle_fastcharge, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[6], "update", handle_update, TEXT_PLAIN), _coap_err);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sever Ready\n");
@@ -267,7 +267,7 @@ _bad:
 	return WICED_SUCCESS;
 }
 
-static wiced_result_t handle_load(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
+static wiced_result_t handle_current(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	static char buf[8];
 	charger_state_t *state = a_get_charger_state();
@@ -276,7 +276,7 @@ static wiced_result_t handle_load(void* context, wiced_coap_server_service_t* se
 	memset(&response, 0, sizeof(response));
 	require(request->method == WICED_COAP_METHOD_GET, _bad);
 
-	sprintf(buf, "%d", state->load);
+	sprintf(buf, "%d", state->current);
 	response.payload.data = (uint8_t*)buf;
 	response.payload.len = strlen(buf);
 _bad:

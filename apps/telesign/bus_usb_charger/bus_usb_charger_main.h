@@ -12,7 +12,7 @@ typedef struct {
 	int fail;		/* fail code */
 	wiced_bool_t usb;	/* charging or not */
 	int voltage;		/* voltage level */
-	int load;		/* load current */
+	int current;		/* current */
 	wiced_bool_t allow_fast_charge;	/* allow fast charge */
 } charger_state_t;
 

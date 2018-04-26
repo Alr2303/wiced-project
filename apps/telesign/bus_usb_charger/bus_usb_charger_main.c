@@ -134,14 +134,14 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 
 static void update_sensor(void)
 {
-	uint16_t voltage, load;
+	uint16_t voltage, current;
 
 	voltage = a_dev_adc_get(WICED_ADC_1);
-	load = a_dev_adc_get(WICED_ADC_2);
+	current = a_dev_adc_get(WICED_ADC_2);
 
 	state.voltage = (int)voltage;
-	state.load = (int)load;
-	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "ADC Voltage: %d, Load: %d\n", state.voltage, state.load);
+	state.current = (int)current;
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "ADC Voltage: %d, Current: %d\n", state.voltage, state.current);
 }
 
 static void dummy_process(void *arg)
@@ -157,7 +157,7 @@ static void sensor_process(void *arg)
 
 	require_noerr(coap_post_alive(false), _err);
 	require_noerr(coap_post_int("voltage", state.voltage), _err);
-	require_noerr(coap_post_int("load", state.load), _err);
+	require_noerr(coap_post_int("current", state.current), _err);
 	require_noerr(coap_post_int("fail", state.fail), _err);
 _err:
 	return;
