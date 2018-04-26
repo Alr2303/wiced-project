@@ -107,6 +107,13 @@ typedef enum
 	WICED_ADC_1,
 	WICED_ADC_2,
 	WICED_ADC_3,
+#ifdef TARGET_BUS_GW
+	WICED_ADC_4,
+	WICED_ADC_5,
+	WICED_ADC_6,
+	WICED_ADC_7,
+	WICED_ADC_8,
+#endif
 	WICED_ADC_MAX, /* Denotes the total number of ADC port aliases. Not a valid ADC alias */
     WICED_ADC_32BIT = 0x7FFFFFFF,
 } wiced_adc_t;
@@ -143,6 +150,7 @@ typedef enum
 #define WICED_SPI_FLASH_CS	WICED_GPIO_5
 
 /* GPIO OUT */
+#if defined(TARGET_USB_GW)
 #define USBGW_GPO_CHG_ON	WICED_GPIO_66
 #define USBGW_GPO_USB1_BIT_ON	WICED_GPIO_77
 #define USBGW_GPO_USB2_BIT_ON	WICED_GPIO_78
@@ -151,10 +159,20 @@ typedef enum
 #define USBGW_GPO_P1_POWER_ON	WICED_GPIO_72
 #define USBGW_GPO_P2_POWER_ON	WICED_GPIO_73
 #define USBGW_GPO_UART_SEL	WICED_GPIO_75
+#endif
 
+#if defined(TARGET_TS_GW)
 #define TSGW_USB_ON		WICED_GPIO_72
 #define TSGW_LED_ON		WICED_GPIO_73
 #define TSGW_BELL_ON		WICED_GPIO_74
+#endif
+
+#if defined(TARGET_BUS_GW)
+#define BUSGW_GPO_P1_POWER	WICED_GPIO_29
+#define BUSGW_GPO_P2_POWER	WICED_GPIO_30
+#define BUSGW_GPO_P3_POWER	WICED_GPIO_31
+#define BUSGW_GPO_P4_POWER	WICED_GPIO_32
+#endif
 
 /* GPIO IN */
 #if defined(TARGET_LED_GW)
@@ -193,6 +211,7 @@ typedef enum
 
 #define LEDGW_SERVER_G		WICED_GPIO_17
 #define LEDGW_SERVER_R		WICED_GPIO_18
+#if defined(TARGET_LED_GW)
 #define LEDGW_WIFI_G		WICED_GPIO_69
 #define LEDGW_WIFI_R		WICED_GPIO_70
 #define LEDGW_P1_G		WICED_GPIO_73
@@ -204,6 +223,7 @@ typedef enum
 #define LEDGW_P4_G		WICED_GPIO_63
 #define LEDGW_P4_R		WICED_GPIO_64
 
+#elif defined(TARGET_USB_GW)
 #define USBGW_LED_SENSOR_G	WICED_GPIO_17
 #define USBGW_LED_SENSOR_Y	WICED_GPIO_18
 #define USBGW_LED_BAT_Y		WICED_GPIO_25
@@ -213,6 +233,7 @@ typedef enum
 #define USBGW_LED_WIFI_Y	WICED_GPIO_70
 #define USBGW_LED_FAULT_R	WICED_GPIO_71
 
+#elif defined(TARGET_TS_GW)
 #define TSGW_SERVER_G		WICED_GPIO_17
 #define TSGW_SERVER_R		WICED_GPIO_18
 #define TSGW_WIFI_G		WICED_GPIO_69
@@ -223,6 +244,7 @@ typedef enum
 #define TSGW_LED_R		WICED_GPIO_30
 #define TSGW_BELL_G		WICED_GPIO_63
 #define TSGW_BELL_R		WICED_GPIO_64
+#endif
 
 #ifdef __cplusplus
 } /*extern "C" */

@@ -113,6 +113,15 @@ const platform_adc_t platform_adc_peripherals[] =
 	[WICED_ADC_1] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_2]},
 	[WICED_ADC_2] = {ADC1, ADC_Channel_2, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_3]},
 	[WICED_ADC_3] = {ADC1, ADC_Channel_3, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_4]},
+#elif defined(TARGET_BUS_GW)
+	[WICED_ADC_1] = {ADC1, ADC_Channel_1, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_2]},
+	[WICED_ADC_2] = {ADC1, ADC_Channel_2, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_3]},
+	[WICED_ADC_3] = {ADC1, ADC_Channel_3, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_4]},
+	[WICED_ADC_4] = {ADC1, ADC_Channel_0, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_1]},
+	[WICED_ADC_5] = {ADC1, ADC_Channel_10, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_33]},
+	[WICED_ADC_6] = {ADC1, ADC_Channel_11, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_34]},
+	[WICED_ADC_7] = {ADC1, ADC_Channel_12, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_35]},
+	[WICED_ADC_8] = {ADC1, ADC_Channel_13, RCC_APB2Periph_ADC1, 1, &platform_gpio_pins[WICED_GPIO_36]},
 #endif
 };
 
@@ -211,6 +220,33 @@ const platform_uart_t platform_uart_peripherals[] =
 			.irq_vector     = DMA2_Stream1_IRQn,
 			.complete_flags = DMA_LISR_TCIF1,
 			.error_flags    = ( DMA_LISR_TEIF1 | DMA_LISR_FEIF1 | DMA_LISR_DMEIF1 ),
+		},
+	},
+#elif defined(TARGET_BUS_GW)
+	[WICED_UART_2] =
+	{
+		.port               = USART2,
+		.tx_pin             = &platform_gpio_pins[WICED_GPIO_54],
+		.rx_pin             = &platform_gpio_pins[WICED_GPIO_55],
+		.cts_pin            = &platform_gpio_pins[WICED_GPIO_52],
+		.rts_pin            = &platform_gpio_pins[WICED_GPIO_53],
+		.tx_dma_config =
+		{
+			.controller     = DMA1,
+			.stream         = DMA1_Stream6,
+			.channel        = DMA_Channel_4,
+			.irq_vector     = DMA1_Stream6_IRQn,
+			.complete_flags = DMA_HISR_TCIF6,
+			.error_flags    = ( DMA_HISR_TEIF6 | DMA_HISR_FEIF6 ),
+		},
+		.rx_dma_config =
+		{
+			.controller     = DMA1,
+			.stream         = DMA1_Stream5,
+			.channel        = DMA_Channel_4,
+			.irq_vector     = DMA1_Stream5_IRQn,
+			.complete_flags = DMA_HISR_TCIF5,
+			.error_flags    = ( DMA_HISR_TEIF5 | DMA_HISR_FEIF5 | DMA_HISR_DMEIF5 ),
 		},
 	},
 #endif
@@ -425,10 +461,11 @@ gpio_button_t platform_gpio_buttons[] =
 #endif
 };
 
+
 const wiced_gpio_t platform_gpio_leds[PLATFORM_LED_COUNT] =
 {
-     [WICED_LED_INDEX_1] = LEDGW_SERVER_G,
-     [WICED_LED_INDEX_2] = LEDGW_SERVER_R,
+	[WICED_LED_INDEX_1] = LEDGW_SERVER_G,
+	[WICED_LED_INDEX_2] = LEDGW_SERVER_R,
 };
 
 /******************************************************
@@ -611,6 +648,27 @@ void platform_init_external_devices( void )
 	platform_gpio_output_low( &platform_gpio_pins[TSGW_USB_ON] );
 	platform_gpio_output_low( &platform_gpio_pins[TSGW_LED_ON] );
 	platform_gpio_output_low( &platform_gpio_pins[TSGW_BELL_ON] );
+#elif defined(TARGET_BUS_GW)
+	/* adc */
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_2], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_3], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_4], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_1], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_33], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_34], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_35], INPUT_HIGH_IMPEDANCE );
+	platform_gpio_init( &platform_gpio_pins[WICED_GPIO_36], INPUT_HIGH_IMPEDANCE );
+
+	/* gpo */
+	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P1_POWER], OUTPUT_PUSH_PULL );
+	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P2_POWER], OUTPUT_PUSH_PULL );
+	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P3_POWER], OUTPUT_PUSH_PULL );
+	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P4_POWER], OUTPUT_PUSH_PULL );
+
+	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P1_POWER] );
+	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P2_POWER] );
+	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P3_POWER] );
+	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P4_POWER] );
 #endif
 
 #ifndef WICED_DISABLE_STDIO
