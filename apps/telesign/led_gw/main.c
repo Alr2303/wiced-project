@@ -59,7 +59,7 @@ static const command_t cons_commands[] =
     /* WIFI_COMMANDS */
     /* PLATFORM_COMMANDS */
     /* DCT_CONSOLE_COMMANDS */
-	BUS_SHELTER_COMMANDS
+	EVENT_LOOP_COMMANDS
 	CMD_TABLE_END
 };
 

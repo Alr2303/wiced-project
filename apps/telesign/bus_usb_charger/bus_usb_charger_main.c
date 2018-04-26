@@ -52,7 +52,7 @@ static const command_t cons_commands[] = {
         /* PLATFORM_COMMANDS */
         /* DCT_CONSOLE_COMMANDS */
 	BUS_USB_COMMANDS
-        BUS_SHELTER_COMMANDS
+        EVENTLOOP_COMMANDS
         CMD_TABLE_END
 };
 
