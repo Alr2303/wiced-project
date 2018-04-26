@@ -56,10 +56,11 @@ static const command_t cons_commands[] = {
         CMD_TABLE_END
 };
 
-#define SENSING_INTERVAL	(30 * 1000)
+#define DEF_SENSING_INTERVAL	(30 * 1000)
 
 #define EVENT_USB_DET		(1 << 0)
 #define EVENT_SENSOR_FINISHED	(1 << 1)
+#define EVENT_CHANGE_INTERVAL	(1 << 2)
 
 #define PWM_LED_MAX		100
 
@@ -81,8 +82,11 @@ static sys_pwm_t pwm_green;
 static sys_pwm_t pwm_red;
 static sys_worker_t worker;
 static wiced_worker_thread_t worker_thread;
+static eventloop_event_node_t event_update_interval;
 
 static charger_state_t state;
+
+static void update_interval(void *arg);
 
 void net_init(void) {
 	app_dct_t* dct;
@@ -194,9 +198,10 @@ void application_start(void) {
 	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
 
 	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
-	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, SENSING_INTERVAL,
+	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, DEF_SENSING_INTERVAL,
 			  sensor_process, dummy_process, 0);
-
+	a_eventloop_register_event(&evt, &event_update_interval, update_interval, EVENT_CHANGE_INTERVAL, 0);
+		
 	coap_daemon_init();
 
 	printf("Start USB Charger\n");
@@ -237,6 +242,24 @@ void a_set_allow_fast_charge(wiced_bool_t enable)
 	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
 	wiced_rtos_delay_milliseconds(50);
 	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
+}
+
+static void update_interval(void *arg)
+{
+	a_sys_worker_change_inteval(&worker, state.interval);
+}
+
+void a_set_update_interval(int ms)
+{
+	if (ms < 1000)
+		ms = 1000;
+	else if (ms > 60 * 1000)
+		ms = 60 * 1000;
+
+	if (state.interval != ms) {
+		state.interval = ms;
+		a_eventloop_set_flag(&evt, EVENT_CHANGE_INTERVAL);
+	}
 }
 
 static wiced_result_t upgrade_worker(void *arg)

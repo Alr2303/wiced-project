@@ -33,7 +33,7 @@ static wiced_coap_client_event_type_t expected_event;
 static wiced_ip_address_t host_ip;
 static wiced_coap_client_t coap_client;
 static wiced_coap_server_t coap_server;
-static wiced_coap_server_service_t service[7];
+static wiced_coap_server_service_t service[8];
 
 static wiced_result_t handle_version(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_fail(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
@@ -42,7 +42,7 @@ static wiced_result_t handle_voltage(void* context, wiced_coap_server_service_t*
 static wiced_result_t handle_current(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_fastcharge(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_update(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
-
+static wiced_result_t handle_interval(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 
 wiced_result_t coap_post_alive(wiced_bool_t reset)
 {
@@ -168,6 +168,7 @@ static wiced_result_t coap_init(void *arg)
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[4], "current", handle_current, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[5], "fastcharge", handle_fastcharge, TEXT_PLAIN), _coap_err);
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[6], "update", handle_update, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[7], "interval", handle_interval, TEXT_PLAIN), _coap_err);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sever Ready\n");
 	
 	for (i = 0; i < 3; i++) {
@@ -203,130 +204,83 @@ wiced_result_t coap_daemon_init(void)
 	return WICED_SUCCESS;
 }
 
-static wiced_result_t handle_version(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
+#define HANDLE_RESPONSE(data) handle_response(context, service, request, data)
+static wiced_result_t handle_response(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request,
+				      const char* data)
 {
 	wiced_coap_server_response_t response;
 	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-
 	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
+	response.payload.data = (uint8_t*)data;
+	response.payload.len = strlen(data);
+	return wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
+}
 
-	response.payload.data = (uint8_t*)a_fw_version();
-	response.payload.len = strlen(a_fw_version());
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+
+static wiced_result_t handle_version(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
+{
+	return HANDLE_RESPONSE(a_fw_version());
 }
 
 static wiced_result_t handle_fail(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	static char buf[8];
 	charger_state_t *state = a_get_charger_state();
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
-
 	sprintf(buf, "%d", state->fail);
-	response.payload.data = (uint8_t*)buf;
-	response.payload.len = strlen(buf);
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+	return HANDLE_RESPONSE(buf);
 }
 
 static wiced_result_t handle_usb(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	charger_state_t *state = a_get_charger_state();
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
-
-	response.payload.data = (uint8_t*)(state->usb ? "1": "0");
-	response.payload.len = 1;
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+	return HANDLE_RESPONSE(state->usb ? "1" : "0");
 }
 
 static wiced_result_t handle_voltage(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	static char buf[8];
 	charger_state_t *state = a_get_charger_state();
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
-
 	sprintf(buf, "%d", state->voltage);
-	response.payload.data = (uint8_t*)buf;
-	response.payload.len = strlen(buf);
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+	return HANDLE_RESPONSE(buf);
 }
 
 static wiced_result_t handle_current(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	static char buf[8];
 	charger_state_t *state = a_get_charger_state();
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
-
 	sprintf(buf, "%d", state->current);
-	response.payload.data = (uint8_t*)buf;
-	response.payload.len = strlen(buf);
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+	return HANDLE_RESPONSE(buf);
 }
 
 static wiced_result_t handle_fastcharge(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	charger_state_t *state = a_get_charger_state();
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-	memset(&response, 0, sizeof(response));
-	require(request->method == WICED_COAP_METHOD_GET, _bad);
-
-	if (request->method == WICED_COAP_METHOD_POST) {
-		int en = (request->payload.data && request->payload.data[0] == '0') ? 1 : 0;
+	if (request->method == WICED_COAP_METHOD_PUT) {
+		int en = (request->payload.data && request->payload.data[0] == '1') ? 1 : 0;
 		wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Change Fast Charge Enable : %d\n", en);
 		a_set_allow_fast_charge(en);
 	}
-
-	response.payload.data = (uint8_t*) (state->allow_fast_charge ? "1" : "0");
-	response.payload.len = 1;
-_bad:
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
+	return HANDLE_RESPONSE(state->allow_fast_charge ? "1" : "0");
 }
 
 static wiced_result_t handle_update(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
-	wiced_coap_server_response_t response;
-	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
-
-	if (request->method == WICED_COAP_METHOD_GET)
+	if (request->method == WICED_COAP_METHOD_PUT) {
+		a_upgrade_request((char*)request->payload.data, request->payload.len);
+		return HANDLE_RESPONSE("OK");
+	} else {
 		return handle_version(context, service, request);
-		
-	require(request->method == WICED_COAP_METHOD_POST, _bad);
-		
-	memset(&response, 0, sizeof(response));
-	response.payload.data = (uint8_t*)"OK";
-	response.payload.len = 2;
+	}
+}
 
-	a_upgrade_request((char*)request->payload.data, request->payload.len);
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
-_bad:
-	response.payload.data = (uint8_t*)"FAIL";
-	response.payload.len = 4;
-
-	wiced_coap_server_send_response(context, service, request->req_handle, &response, type);
-	return WICED_SUCCESS;
-
+static wiced_result_t handle_interval(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
+{
+	static char buf[12];
+	charger_state_t *state = a_get_charger_state();
+	if (request->method == WICED_COAP_METHOD_PUT) {
+		int val = atol((char*)request->payload.data);
+		a_set_update_interval(val);
+	}
+	sprintf(buf, "%d", state->interval);
+	return HANDLE_RESPONSE(buf);
 }

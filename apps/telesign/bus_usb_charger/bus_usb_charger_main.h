@@ -14,6 +14,7 @@ typedef struct {
 	int voltage;		/* voltage level */
 	int current;		/* current */
 	wiced_bool_t allow_fast_charge;	/* allow fast charge */
+	int interval;			/* report interval (s) */
 } charger_state_t;
 
 typedef struct {
@@ -27,5 +28,6 @@ const char * a_fw_version(void);
 const char * a_fw_model(void);
 charger_state_t * a_get_charger_state(void);
 void a_set_allow_fast_charge(wiced_bool_t enable);
+void a_set_update_interval(int ms);
 wiced_result_t a_upgrade_request(char* json_data, size_t len);
 wiced_result_t a_asynchronous_event(event_handler_t function, void* arg);
