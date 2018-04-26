@@ -33,9 +33,10 @@ static wiced_coap_client_event_type_t expected_event;
 static wiced_ip_address_t host_ip;
 static wiced_coap_client_t coap_client;
 static wiced_coap_server_t coap_server;
-static wiced_coap_server_service_t service[8];
+static wiced_coap_server_service_t service[9];
 
 static wiced_result_t handle_version(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
+static wiced_result_t handle_id(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_fail(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_usb(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
 static wiced_result_t handle_voltage(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request);
@@ -162,13 +163,14 @@ static wiced_result_t coap_init(void *arg)
 	require_noerr(wiced_coap_server_start(&coap_server, WICED_STA_INTERFACE, COAP_TARGET_PORT, NULL), _coap_err);
 
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[0], "version", handle_version, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[1], "fail", handle_fail, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[2], "usb", handle_usb, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[3], "voltage", handle_voltage, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[4], "current", handle_current, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[5], "fastcharge", handle_fastcharge, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[6], "update", handle_update, TEXT_PLAIN), _coap_err);
-	require_noerr(wiced_coap_server_add_service(&coap_server, &service[7], "interval", handle_interval, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[1], "id", handle_id, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[2], "fail", handle_fail, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[3], "usb", handle_usb, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[4], "voltage", handle_voltage, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[5], "current", handle_current, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[6], "fastcharge", handle_fastcharge, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[7], "update", handle_update, TEXT_PLAIN), _coap_err);
+	require_noerr(wiced_coap_server_add_service(&coap_server, &service[8], "interval", handle_interval, TEXT_PLAIN), _coap_err);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sever Ready\n");
 	
 	for (i = 0; i < 3; i++) {
@@ -220,6 +222,12 @@ static wiced_result_t handle_response(void* context, wiced_coap_server_service_t
 static wiced_result_t handle_version(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
 {
 	return HANDLE_RESPONSE(a_fw_version());
+}
+
+static wiced_result_t handle_id(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)
+{
+	charger_state_t *state = a_get_charger_state();
+	return HANDLE_RESPONSE(state->id);
 }
 
 static wiced_result_t handle_fail(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request)

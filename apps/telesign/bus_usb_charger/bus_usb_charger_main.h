@@ -8,7 +8,10 @@
  */
 #pragma once
 
+#include "app_dct.h"
+
 typedef struct {
+	char id[MAX_DEVICE_ID];
 	int fail;		/* fail code */
 	wiced_bool_t usb;	/* charging or not */
 	int voltage;		/* voltage level */
