@@ -175,7 +175,8 @@ void application_start(void) {
 	wiced_init();
 
 	memset(&state, 0, sizeof(state));
-	state.allow_fast_charge = true;
+	a_set_allow_fast_charge(true);
+
 	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
 			    0, sizeof(app_dct_t));
 	strncpy(state.id, dct->device_id, sizeof(state.id));
@@ -184,7 +185,6 @@ void application_start(void) {
 	wiced_log_init(level, log_output_handler, NULL);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "USB Charger Version: v%s\n", fw_version);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Device ID: %s\n", state.id);
-	a_set_allow_fast_charge(true);
 
 	result = command_console_init(STDIO_UART, sizeof(command_buffer), command_buffer,
 				      COMMAND_HISTORY_LENGTH, command_history_buffer, " ");
@@ -245,9 +245,9 @@ void a_set_allow_fast_charge(wiced_bool_t enable)
 	}
 
 	/* reset charger device */
-	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
-	wiced_rtos_delay_milliseconds(50);
 	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
+	wiced_rtos_delay_milliseconds(100);
+	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
 }
 
 static void update_interval(void *arg)

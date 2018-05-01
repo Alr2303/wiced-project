@@ -30,9 +30,9 @@ int cmd_fast_charge(int argc, char* argv[])
 		wiced_gpio_output_low(GPO_ENABLE_FAST_CHARGE);
 
 	/* reset charger device */
-	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
-	wiced_rtos_delay_milliseconds(50);
 	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
+	wiced_rtos_delay_milliseconds(100);
+	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
 	return ERR_CMD_OK;
 }
 
