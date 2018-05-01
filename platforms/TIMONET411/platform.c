@@ -386,21 +386,21 @@ void platform_init_external_devices( void )
 {
 	platform_led_init();
 
-    /* adc */
-    platform_gpio_init(&platform_gpio_pins[WICED_GPIO_2], INPUT_HIGH_IMPEDANCE);
-    platform_gpio_init(&platform_gpio_pins[WICED_GPIO_3], INPUT_HIGH_IMPEDANCE);
+	/* adc */
+	platform_gpio_init(&platform_gpio_pins[WICED_GPIO_2], INPUT_HIGH_IMPEDANCE);
+	platform_gpio_init(&platform_gpio_pins[WICED_GPIO_3], INPUT_HIGH_IMPEDANCE);
 
-    /* gpi, button */
-    platform_gpio_init(&platform_gpio_pins[GPIO_BUTTON_USB_DETECT], INPUT_PULL_UP);
+	/* gpi, button */
+	platform_gpio_init(&platform_gpio_pins[GPIO_BUTTON_USB_DETECT], INPUT_PULL_UP);
 
-    /* gpo */
-    platform_gpio_init(&platform_gpio_pins[GPO_LOAD_TEST], OUTPUT_PUSH_PULL);
-    platform_gpio_init(&platform_gpio_pins[GPO_CHARGE_CONTROL], OUTPUT_PUSH_PULL);
-    platform_gpio_init(&platform_gpio_pins[GPO_ENABLE_FAST_CHARGE], OUTPUT_PUSH_PULL);
-    
-    platform_gpio_output_low(&platform_gpio_pins[GPO_LOAD_TEST]);
-    platform_gpio_output_high(&platform_gpio_pins[GPO_ENABLE_FAST_CHARGE]);
-    platform_gpio_output_high(&platform_gpio_pins[GPO_CHARGE_CONTROL]);
+	/* gpo */
+	platform_gpio_init(&platform_gpio_pins[GPO_LOAD_TEST], OUTPUT_PUSH_PULL);
+	platform_gpio_init(&platform_gpio_pins[GPO_CHARGE_CONTROL], OUTPUT_PUSH_PULL);
+	platform_gpio_init(&platform_gpio_pins[GPO_ENABLE_FAST_CHARGE], OUTPUT_PUSH_PULL);
+
+	platform_gpio_output_low(&platform_gpio_pins[GPO_LOAD_TEST]);
+	platform_gpio_output_high(&platform_gpio_pins[GPO_ENABLE_FAST_CHARGE]);
+	platform_gpio_output_high(&platform_gpio_pins[GPO_CHARGE_CONTROL]);
 
 #ifndef WICED_DISABLE_STDIO
 	/* Initialise UART standard I/O */
