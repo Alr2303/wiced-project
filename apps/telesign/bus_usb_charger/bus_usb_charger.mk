@@ -28,7 +28,8 @@ $(NAME)_COMPONENTS += protocols/HTTP \
 		      utilities/command_console \
 	              utilities/command_console/wifi \
 		      utilities/command_console/platform \
-	              utilities/command_console/dct
+	              utilities/command_console/dct \
+	              utilities/command_console/ping
 
 GLOBAL_DEFINES     += MAC_ADDRESS_SET_BY_HOST
 

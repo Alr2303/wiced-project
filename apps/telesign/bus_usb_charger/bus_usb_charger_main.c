@@ -15,6 +15,7 @@
 #include "dct/command_console_dct.h"
 #include "wifi/command_console_wifi.h"
 #include "platform/command_console_platform.h"
+#include "ping/command_console_ping.h"
 
 #include "network.h"
 #include "app_dct.h"
@@ -48,7 +49,8 @@ const char* fw_model = "USB-CHARGER";
 static char command_buffer[MAX_COMMAND_LENGTH];
 static char command_history_buffer[MAX_COMMAND_LENGTH * COMMAND_HISTORY_LENGTH];
 static const command_t cons_commands[] = {
-        /* WIFI_COMMANDS */
+        WIFI_COMMANDS
+	PING_COMMANDS
         /* PLATFORM_COMMANDS */
         /* DCT_CONSOLE_COMMANDS */
 	BUS_USB_COMMANDS
