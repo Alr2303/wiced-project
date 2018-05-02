@@ -10,7 +10,9 @@
 
 int cmd_fast_charge(int argc, char* argv[]);
 int cmd_usb_detect(int argc, char* argv[]);
+int cmd_usb_test(int argc, char* argv[]);
 
 #define BUS_USB_COMMANDS \
  { "fast_charge", cmd_fast_charge, 1, NULL, NULL, "1/0", "Enable Fast Charge" }, \
- { "usb_detect", cmd_usb_detect, 0, NULL, NULL, NULL, "USB Detect" },
+ { "usb_detect", cmd_usb_detect, 0, NULL, NULL, NULL, "USB Detect" }, \
+ { "usb_test", cmd_usb_test, 0, NULL, NULL, NULL, "USB Test" },
