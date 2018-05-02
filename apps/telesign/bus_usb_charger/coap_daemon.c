@@ -87,7 +87,7 @@ wiced_result_t coap_post_data(char* path, char* data, size_t len)
 
 	wiced_coap_set_uri_path(&request.options, path ? path : "server");
 
-	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sent Post: %s - %s\n", path, data);
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sent Post: %s - %s\n", path ? path : "server" , data);
 	require_noerr(wiced_coap_client_post(&coap_client, &request, WICED_COAP_MSGTYPE_CON, host_ip, COAP_TARGET_PORT), _error);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Waiting Ack\n");
 	require_noerr(coap_wait_for(WICED_COAP_CLIENT_EVENT_TYPE_POSTED, WICED_COAP_TIMEOUT), _error);
