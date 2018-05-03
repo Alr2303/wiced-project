@@ -16,7 +16,8 @@ $(NAME)_COMPONENTS += \
 		      utilities/command_console \
 	              utilities/command_console/dct
 
-GLOBAL_DEFINES	   += TARGET_BUS_GW
+GLOBAL_DEFINES	   += TARGET_BUS_GW \
+			WICED_DISABLE_MCU_POWERSAVE
 
 WIFI_CONFIG_DCT_H := $(COMMON)/wifi_config_dct.h
 
