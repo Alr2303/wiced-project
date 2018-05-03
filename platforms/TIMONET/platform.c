@@ -690,7 +690,11 @@ WWD_RTOS_DEFINE_ISR( usart1_irq )
 
 WWD_RTOS_DEFINE_ISR( usart2_irq )
 {
+#if defined(TARGET_BUS_GW)
+	platform_uart_irq( &platform_uart_drivers[WICED_UART_2] );
+#else
 	platform_uart_irq( wiced_bt_uart_driver );
+#endif
 }
 
 WWD_RTOS_DEFINE_ISR( usart6_irq )
@@ -705,7 +709,11 @@ WWD_RTOS_DEFINE_ISR( usart1_tx_dma_irq )
 
 WWD_RTOS_DEFINE_ISR( usart2_tx_dma_irq )
 {
+#if defined(TARGET_BUS_GW)
+	platform_uart_tx_dma_irq( &platform_uart_drivers[WICED_UART_2] );
+#else
 	platform_uart_tx_dma_irq( wiced_bt_uart_driver );
+#endif
 }
 
 WWD_RTOS_DEFINE_ISR( usart6_tx_dma_irq )
@@ -720,7 +728,11 @@ WWD_RTOS_DEFINE_ISR( usart1_rx_dma_irq )
 
 WWD_RTOS_DEFINE_ISR( usart2_rx_dma_irq )
 {
+#if defined(TARGET_BUS_GW)
+	platform_uart_rx_dma_irq( &platform_uart_drivers[WICED_UART_2] );
+#else
 	platform_uart_rx_dma_irq( wiced_bt_uart_driver );
+#endif
 }
 
 WWD_RTOS_DEFINE_ISR( usart6_rx_dma_irq )
