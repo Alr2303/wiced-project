@@ -24,7 +24,9 @@
 const char* fw_version = EXPAND_AND_QUOTE(VERSION);
 const char* fw_model = "BUS-USB-CTRL";
 
-#define CONSOLE_UART	STDIO_UART
+#define UART_RX_BUFFER_SIZE 256
+
+#define CONSOLE_UART	APP_UART
 #define MAX_PORT	5
 #define AVG_ALPHA	0.33 	/* N=5, smoothing factor = 2 / (1 + N)  */
 
@@ -54,6 +56,18 @@ const static int port[MAX_PORT] = {
 	BUSGW_GPO_P4_POWER,
 	BUSGW_GPO_USB_POWER
 };
+
+static wiced_uart_config_t uart_app_config =
+{
+	.baud_rate    = 115200,
+	.data_width   = DATA_WIDTH_8BIT,
+	.parity       = NO_PARITY,
+	.stop_bits    = STOP_BITS_1,
+	.flow_control = FLOW_CONTROL_DISABLED
+};
+static wiced_ring_buffer_t rx_buffer;
+static uint8_t rx_data[UART_RX_BUFFER_SIZE];
+
 
 static int adc_avg[WICED_ADC_MAX];
 static int on[MAX_PORT];
@@ -143,6 +157,10 @@ void application_start(void)
 	uint32_t cnt;
 
 	wiced_core_init();
+
+	ring_buffer_init(&rx_buffer, rx_data, UART_RX_BUFFER_SIZE);
+	wiced_uart_init(APP_UART, &uart_app_config, &rx_buffer);
+
 	command_console_init(CONSOLE_UART, sizeof(command_buffer), command_buffer,
 			     COMMAND_HISTORY_LENGTH, command_history_buffer, " ");
 	console_add_cmd_table(cons_commands);
