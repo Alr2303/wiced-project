@@ -664,11 +664,13 @@ void platform_init_external_devices( void )
 	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P2_POWER], OUTPUT_PUSH_PULL );
 	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P3_POWER], OUTPUT_PUSH_PULL );
 	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_P4_POWER], OUTPUT_PUSH_PULL );
+	platform_gpio_init( &platform_gpio_pins[BUSGW_GPO_USB_POWER], OUTPUT_PUSH_PULL );
 
 	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P1_POWER] );
 	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P2_POWER] );
 	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P3_POWER] );
 	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_P4_POWER] );
+	platform_gpio_output_low( &platform_gpio_pins[BUSGW_GPO_USB_POWER] );
 #endif
 
 #ifndef WICED_DISABLE_STDIO

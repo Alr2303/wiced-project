@@ -25,7 +25,7 @@ const char* fw_version = EXPAND_AND_QUOTE(VERSION);
 const char* fw_model = "BUS-USB-CTRL";
 
 #define CONSOLE_UART	STDIO_UART
-#define MAX_PORT	4
+#define MAX_PORT	5
 #define AVG_ALPHA	0.33 	/* N=5, smoothing factor = 2 / (1 + N)  */
 
 #define COMMAND_HISTORY_LENGTH  (5)
@@ -43,12 +43,16 @@ static const command_t cons_commands[] =
 	{ "hello", cmd_hello, 0, NULL, NULL, NULL, "Hello" },
 	{ "version", cmd_version, 0, NULL, NULL, NULL, "Read Version" },
 	{ "read", cmd_read, 0, NULL, NULL, NULL, "Read All Value" } ,
-	{ "set", cmd_set, 4, NULL, NULL, "each port", "Set Power Control" },
+	{ "set", cmd_set, 5, NULL, NULL, "each port", "Set Power Control" },
 	CMD_TABLE_END
 };
 
-const static int port[WICED_ADC_MAX] = {
-	BUSGW_GPO_P1_POWER, BUSGW_GPO_P2_POWER, BUSGW_GPO_P3_POWER, BUSGW_GPO_P4_POWER
+const static int port[MAX_PORT] = {
+	BUSGW_GPO_P1_POWER,
+	BUSGW_GPO_P2_POWER,
+	BUSGW_GPO_P3_POWER,
+	BUSGW_GPO_P4_POWER,
+	BUSGW_GPO_USB_POWER
 };
 
 static int adc_avg[WICED_ADC_MAX];
@@ -81,7 +85,7 @@ static int cmd_set(int argc, char* argv[])
 	int i;
 	int len;
 	char buf[128];
-	if (argc < 5)
+	if (argc < 6)
 		return ERR_INSUFFICENT_ARGS;
 
 	for (i = 0; i < MAX_PORT; i++) {
@@ -94,7 +98,7 @@ static int cmd_set(int argc, char* argv[])
 		}
 	}
 
-	len = sprintf(buf, "%d %d %d %d\r\n", on[0], on[1], on[2], on[3]);
+	len = sprintf(buf, "%d %d %d %d %d\r\n", on[0], on[1], on[2], on[3], on[4]);
 	platform_stdio_tx_lock();
         wiced_uart_transmit_bytes(CONSOLE_UART, buf, len);
 	platform_stdio_tx_unlock();
@@ -106,10 +110,10 @@ static int cmd_read(int argc, char* argv[])
 	int len;
 	char buf[256];
 
-	len = sprintf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d\r\n",
-		temperature, humidity, on[0], on[1], on[2], on[3],
-		adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3], 
-		adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]);
+	len = sprintf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\r\n",
+		      temperature, humidity, on[0], on[1], on[2], on[3], on[4],
+		      adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3],
+		      adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]);
 	platform_stdio_tx_lock();
         wiced_uart_transmit_bytes(CONSOLE_UART, buf, len);
 	platform_stdio_tx_unlock();
