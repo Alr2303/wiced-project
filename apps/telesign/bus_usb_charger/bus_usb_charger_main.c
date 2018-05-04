@@ -50,21 +50,27 @@ static char command_buffer[MAX_COMMAND_LENGTH];
 static char command_history_buffer[MAX_COMMAND_LENGTH * COMMAND_HISTORY_LENGTH];
 static const command_t cons_commands[] = {
         WIFI_COMMANDS
-	PING_COMMANDS
-        /* PLATFORM_COMMANDS */
-        /* DCT_CONSOLE_COMMANDS */
+	/* PING_COMMANDS */
 	BUS_USB_COMMANDS
         EVENTLOOP_COMMANDS
         CMD_TABLE_END
 };
 
 #define DEF_SENSING_INTERVAL	(30 * 1000)
+#define CHARGING_TEST_INTERVAL	(3600*1000)
 
 #define EVENT_USB_DET		(1 << 0)
 #define EVENT_SENSOR_FINISHED	(1 << 1)
 #define EVENT_CHANGE_INTERVAL	(1 << 2)
 
 #define PWM_LED_MAX		100
+
+#define VALID_VOLTAGE_ADC	500
+#define VALID_IDLE_CURRNET_ADC	50
+#define VALID_TEST_CURRENT_ADC	400
+
+#define ERR_LOW_VOLTAGE		(1 << 0)
+#define ERR_USB_TEST		(1 << 1)
 
 typedef enum {
 	LED_POWER,
@@ -85,6 +91,7 @@ static sys_pwm_t pwm_red;
 static sys_worker_t worker;
 static wiced_worker_thread_t worker_thread;
 static eventloop_event_node_t event_update_interval;
+static eventloop_timer_node_t timer_sensor_node;
 
 static charger_state_t state;
 
@@ -124,6 +131,9 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
 
+	if (state.test_process)
+		return;
+
 	state.usb = val;
 	if (val) {
 		a_sys_pwm_level(&pwm_green, 0);
@@ -138,7 +148,43 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 	}
 }
 
-static void update_sensor(void)
+static wiced_result_t sensor_post(void *arg)
+{
+	if (a_network_is_up()) {
+		require_noerr(coap_post_alive(false), _err);
+		require_noerr(coap_post_int("voltage", state.voltage), _err);
+		require_noerr(coap_post_int("current", state.current), _err);
+		require_noerr(coap_post_int("fail", state.fail), _err);
+	}
+_err:
+	return WICED_SUCCESS;
+}
+
+static void charging_test(void)
+{
+	uint16_t current;
+
+	state.test_process = WICED_TRUE;
+
+	wiced_gpio_output_high(GPO_LOAD_TEST);
+	wiced_rtos_delay_milliseconds(5);
+	current = a_dev_adc_get(WICED_ADC_2);
+	wiced_gpio_output_low(GPO_LOAD_TEST);
+	wiced_rtos_delay_milliseconds(1);
+
+	state.test_process = WICED_FALSE;
+
+	if (current > VALID_TEST_CURRENT_ADC) {
+		state.fail |= ERR_USB_TEST;
+	} else {
+		state.fail &= ~ERR_USB_TEST;
+	}
+
+	/* recheck usb charging */
+	usb_detect_fn(0, 0);
+}
+
+static void sensor_process(void *arg)
 {
 	uint16_t voltage, current;
 
@@ -148,26 +194,28 @@ static void update_sensor(void)
 	state.voltage = (int)voltage;
 	state.current = (int)current;
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "ADC Voltage: %d, Current: %d\n", state.voltage, state.current);
+
+	if (state.voltage < VALID_VOLTAGE_ADC) {
+		state.fail |= ERR_LOW_VOLTAGE;
+	} else {
+		state.fail &= ~ERR_LOW_VOLTAGE;
+	}
+
+	if (state.current < VALID_IDLE_CURRNET_ADC) {
+		state.test_timeout += DEF_SENSING_INTERVAL;
+		if (state.test_timeout >= CHARGING_TEST_INTERVAL) {
+			state.test_timeout = 0;
+			charging_test();
+		}
+	} else {
+		state.test_timeout = 0;
+	}
+
+	if (a_network_is_up()) {
+		wiced_rtos_send_asynchronous_event(&worker_thread, sensor_post, 0);
+	}
 }
 
-static void dummy_process(void *arg)
-{
-}
-
-static void sensor_process(void *arg)
-{
-	update_sensor();
-
-	if (!a_network_is_up())
-		return;
-
-	require_noerr(coap_post_alive(false), _err);
-	require_noerr(coap_post_int("voltage", state.voltage), _err);
-	require_noerr(coap_post_int("current", state.current), _err);
-	require_noerr(coap_post_int("fail", state.fail), _err);
-_err:
-	return;
-}
 
 void application_start(void) {
 	app_dct_t* dct;
@@ -201,14 +249,13 @@ void application_start(void) {
 	a_sys_pwm_init(&pwm_red, &evt, WICED_PWM_2, 10, 100);
 
 	usb_detect_fn(0, 0);
-	update_sensor();
+	sensor_process(0);
 
 	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
 
 	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
-	a_sys_worker_init(&worker, &worker_thread, &evt, EVENT_SENSOR_FINISHED, DEF_SENSING_INTERVAL,
-			  sensor_process, dummy_process, 0);
 	a_eventloop_register_event(&evt, &event_update_interval, update_interval, EVENT_CHANGE_INTERVAL, 0);
+	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, DEF_SENSING_INTERVAL, 0);
 		
 	coap_daemon_init();
 

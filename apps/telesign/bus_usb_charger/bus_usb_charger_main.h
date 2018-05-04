@@ -12,12 +12,15 @@
 
 typedef struct {
 	char id[MAX_DEVICE_ID];
-	int fail;		/* fail code */
+	uint32_t fail;		/* fail code */
 	wiced_bool_t usb;	/* charging or not */
 	int voltage;		/* voltage level */
 	int current;		/* current */
 	wiced_bool_t allow_fast_charge;	/* allow fast charge */
 	int interval;			/* report interval (s) */
+
+	wiced_bool_t test_process;
+	uint32_t test_timeout;
 } charger_state_t;
 
 typedef struct {
