@@ -125,6 +125,7 @@ _err:
 	return WICED_SUCCESS;
 }
 
+static void sensor_process(void *arg);
 static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
@@ -143,6 +144,7 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 
 	if (a_network_is_up()) {
 		wiced_rtos_send_asynchronous_event(&worker_thread, usb_post, 0);
+		sensor_process(0);
 	}
 }
 
