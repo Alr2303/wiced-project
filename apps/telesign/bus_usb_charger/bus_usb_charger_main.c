@@ -60,8 +60,7 @@ static const command_t cons_commands[] = {
 #define CHARGING_TEST_INTERVAL	(3600*1000)
 
 #define EVENT_USB_DET		(1 << 0)
-#define EVENT_SENSOR_FINISHED	(1 << 1)
-#define EVENT_CHANGE_INTERVAL	(1 << 2)
+#define EVENT_CHANGE_INTERVAL	(1 << 1)
 
 #define PWM_LED_MAX		100
 
@@ -88,7 +87,6 @@ static sys_led_t led;
 static sys_button_t button;
 static sys_pwm_t pwm_green;
 static sys_pwm_t pwm_red;
-static sys_worker_t worker;
 static wiced_worker_thread_t worker_thread;
 static eventloop_event_node_t event_update_interval;
 static eventloop_timer_node_t timer_sensor_node;
@@ -301,7 +299,8 @@ void a_set_allow_fast_charge(wiced_bool_t enable)
 
 static void update_interval(void *arg)
 {
-	a_sys_worker_change_inteval(&worker, state.interval);
+	a_eventloop_deregister_timer(&evt, &timer_sensor_node);
+	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, state.interval, 0);
 }
 
 void a_set_update_interval(int ms)
