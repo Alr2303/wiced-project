@@ -1,0 +1,115 @@
+Building Apple's WAC POSIX Server source package
+------------------------------------------------
+
+1) Setup toolchain and root file system with Meego ARM cross-compiler (details are out of the scope of these simple instructions).
+
+Here's a list of RPM packages used for the setup:
+- alsa-lib-1.0.25-15.1.armv7l.rpm
+- alsa-lib-devel-1.0.25-15.1.armv7l.rpm
+- cross-armv7l-binutils-2.21.51.0.8-5.2.i586.rpm
+- cross-armv7l-gcc-4.6.1-5.4.i586.rpm
+- cross-armv7l-glibc-2.13-8.3.i586.rpm
+- cross-armv7l-glibc-devel-2.13-8.1.i586.rpm
+- cross-armv7l-glibc-headers-2.13-8.1.i586.rpm
+- cross-armv7l-kernel-headers-3.0.1-8.1.i586.rpm
+- gmp-4.3.2-9.1.i586.rpm
+- mpc-0.8.2-6.1.i586.rpm
+- mpfr-2.4.2-6.1.i586.rpm
+
+IMPORTANT: the WAC server needs DHCP services to provide an IP address to a wireless client.
+	   The "udhcpd" is the only DHCP server utility supported at the moment.
+	   Tests were conducted with udhcp version 0.9.8 (thanks to Li that has cross-compiled the udhcp package and has generated an armv7l RPM package).
+	   If necessary, changes could be made to support the full blown ISC DHCP server utility ("dhcpd").
+
+2) Build mDNSResponder package for the target platform. See instructions specific to that package.
+
+3) Edit build.sh to reflect paths specific to your build/dev environment.
+Influential variables are:
+- BASEDIR -> top level directory in which all necessary software components will be stored (toolchain, root filesystem and mDNSResponder open source package)
+- MDNSRESPONDERDIR -> path to the open source mDNSResponder package
+- TOOLCHAIN_DIR -> path to the toolchain / cross-compiler
+
+4) The WAC Server daemon interacts directly with WiFi interface(s).
+However, at the moment, automatic discovery of these interfaces is not practical.
+There's currently no way to find out for what purpose each available Wi-Fi interface will be actuallu used;
+STA mode? AP/SoftAP mode? APSTA mode? 2G band only? 5G band only? Both bands?.
+As a result, the WAC server code and shell scripts needs to be configured:
+
+   a) Start with "Platform/Platform.include.mk" and edit the following compilation directives/definitions:
+
+   - _PLAT_IFACE_SOFTAP=\"wlan0\" --> name of the WiFi interface that is going to function as a Software AP interface.
+
+   - _PLAT_IFACE_STA=\"wlan0\"    --> name of the WiFi interface(s) that is(are) going to function as Station interface(s),
+				      this can be a space-separated list of interface names (-D_PLAT_IFACE_STA=\"wlan0 wlan1\"),
+				      or, this can be the same interface that is also going to be used as a Software AP.
+				      That's OK because the WAC server does not use SoftAP and STA functions at the same time.
+				      The SoftAP is brought up first, it's used and then it's shut down before bringing the STA up.
+
+   - _PLAT_SCRIPT_PATH=\"/usr/share/wac\" --> Directory in which the WAC server is going to look for its shell script and 
+					      "udhcpd" configuraion file; it's also used by the WAC server to store Wi-Fi credentials 
+					      along with the last WAC configuration status.
+					      Consequently, that directory must be *writable*.
+
+   b) Just as above, the very same interface names need to be configured at the top of "Platform/scripts/platform_wl_wrapper.sh":
+
+   - IFACE_SOFTAP="wlan0"	  --> SoftAP interface name
+
+   - IFACE_STA_LIST="wlan0"       --> Space-separated list of STA interfaces;
+				      can be a single interface and can be identical to SoftAP interface.
+
+   - DHCP_CLIENT="dhcpcd"         --> Either "dhcpcd" or "udhcpc"; these are the two DHCP clients that are currently supported.
+				      Note that the WAC server will interact directly with the DHCP client utility and will bind it 
+				      to each specific STA interface listed above.
+				      This means that the WAC server won't be able to interact properly with "dhcpcd" if it's being run in "master" mode 
+				      (i.e. when a single instance of "dhcpcd" is handling all available network interfaces).
+
+   c) The "udhcpd" configuration script "Platform/scripts/udhcpd.softap.conf" needs to be edited with the corresponding SoftAP interface name:
+
+   - # The interface that udhcpd will use 
+     interface	     wlan0                                   #default: eth0
+
+   - # The location of the leases file
+     # Please note that it integrates the name of the interface specified at the top !
+     lease_file      /var/lib/misc/udhcpd-wlan0.leases       #default: /var/lib/misc/udhcpd.leases
+
+   - # The location of the pid file
+     # Please note that it integrates the name of the interface specified at the top !
+     pidfile         /var/run/udhcpd-wlan0.pid               #default: /var/run/udhcpd.pid
+
+
+5) Run build.sh, like so:
+
+$ ./build.sh
+
+6) Collect the "WACServer" executable along with its accompanying shell script and the "udhcpd" configuration script
+
+   a) Copy "WACServer" to "/usr/sbin" on the target (invoke "chmod +x WACServer" as necessary).
+
+   b) Copy the content of "Platform/scripts/" to the _PLAT_SCRIPT_PATH directory on the target.
+      As stated in 4),  the _PLAT_SCRIPT_PATH directory must be writable.
+
+7) Run the WAC server daemon:
+
+    a) Make sure "/system/vendor/firmware/fw_wifi_apsta.bin" is present on the target.
+       Load the DHD driver using "fw_wifi_apsta.bin", like so:
+
+$ insmod bcmdhd.ko firmware_path=/system/vendor/firmware/fw_wifi_apsta.bin nvram_path=/system/vendor/firmware/fw_wifi_nvram.txt
+
+       Since WACServer relies on the "wl" utility, ensure that "wl ver" or "wl status" returns some meaningful output instead of an error code.
+
+    b) Services that may be trying to use the same WiFi interface(s) as WACServer should be disabled; "hostapd" is one of those services.
+
+    c) Launch WACServer and start WAC process:
+
+$ WACServer --daemon-verbose
+
+    d) Use an IOS device (iPhone/iPad/iPod Touch) or a machine running Mac OS
+       to initiate the WAC process.
+       See here:
+
+       http://confluence.broadcom.com/display/MobileMultimedia/QA+BCM43909+WAC
+       (see from step 5. in the document)
+
+    e) If needed, reset Wi-Fi credentials and restart WAC process:
+
+$ killall WACServer && WACServer --reset-config --daemon-verbose

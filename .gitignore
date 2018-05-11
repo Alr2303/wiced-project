@@ -1,0 +1,11 @@
+GPATH
+GRTAGS
+GTAGS
+build
+build/*
+generated_mac_address.txt
+cscope*
+.gdbinit
+*.bin
+*.zip
+temp.log

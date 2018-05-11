@@ -1,0 +1,165 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                     Modified API's (between WICED 5.0.0 and WICED 5.0.1)
+========================================================================================================================
+Please refer to the doxygen documentation and the referenced header file for detailed descriptions of all API(s)
+========================================================================================================================
+************************************************************************************************************************
+* There are no changes to the APIs between WICED 5.0.0 and WICED 5.0.1
+************************************************************************************************************************
+
+========================================================================================================================
+                                     Modified API's (between WICED 4.0.0 and WICED 5.0.0)
+========================================================================================================================
+Please refer to the doxygen documentation and the referenced header file for detailed descriptions of all API(s)
+========================================================================================================================
+************************************************************************************************************************
+* Description:
+   * Add interface parameter for DNS hostname lookup
+* Location(s):
+   * libraries/protocols/DNS/dns.h
+* Prior definition(s):
+   * wiced_result_t dns_client_hostname_lookup(const char* hostname, wiced_ip_address_t* address, uint32_t timeout_ms);
+* New definition(s):
+   * wiced_result_t dns_client_hostname_lookup(const char* hostname, wiced_ip_address_t* address, uint32_t timeout_ms,
+                                               wiced_interface_t interface );
+************************************************************************************************************************
+* Description:
+   * Refactored URL parameter for Websocket client.
+* Location(s):
+   * libraries/websocket/websocket.h
+* Prior definition(s):
+   * wiced_result_t wiced_websocket_connect( wiced_websocket_t* websocket,
+                                             const wiced_websocket_handshake_fields_t* websocket_header );
+* New definition(s):
+   * wiced_result_t wiced_websocket_connect( wiced_websocket_t* websocket,
+                                             const wiced_websocket_client_url_protocol_t* url );
+************************************************************************************************************************
+* Description:
+   * Replaced TLS context with TLS identity to enable secure connection and refactored URL parameter for Websocket client
+* Location(s):
+   * libraries/websocket/websocket.h
+* Prior definition(s):
+   * wiced_result_t wiced_websocket_secure_connect( wiced_websocket_t* websocket,
+                                                    const wiced_websocket_handshake_fields_t* websocket_header,
+                                                    wiced_tls_context_t*  tls_context );
+* New definition(s):
+   * wiced_result_t wiced_websocket_secure_connect( wiced_websocket_t* websocket,
+                                                    const wiced_websocket_client_url_protocol_t* url,
+                                                    wiced_tls_identity_t* tls_identity );
+************************************************************************************************************************
+* Description:
+   * Refactored close API to include 'code' & 'reason' - inline with RFC
+* Location(s):
+   * libraries/websocket/websocket.h
+* Prior definition(s):
+   * wiced_result_t wiced_websocket_close ( wiced_websocket_t* websocket, const char* optional_close_message );
+* New definition(s):
+   * wiced_result_t wiced_websocket_close ( wiced_websocket_t* websocket, const uint16_t code, const char* reason );
+************************************************************************************************************************
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                                Added API's
+========================================================================================================================
+Please refer to the doxygen documentation and the referenced header file for definition of the new API(s)
+========================================================================================================================
+************************************************************************************************************************
+* Description:
+   * Initial support for Neighborhood Area Networking (NAN) API's
+* Location(s):
+   * wwd_wifi.h
+   * See also wwd_nan_xxx()
+* Definition(s):
+   * See the API header files for changes
+************************************************************************************************************************
+* Description:
+   * Update configuration number and notify the change to controllers if Homekit library is running
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_set_configuration_number( uint32_t config_number );
+************************************************************************************************************************
+* Description:
+   * Get current configuration number
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_get_configuration_number( uint32_t* config_number );
+************************************************************************************************************************
+* Description:
+   * Set primary service in an accessory
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_service_set_primary( wiced_homekit_accessories_t* accessory,
+                                                       wiced_homekit_services_t* primary_service );
+************************************************************************************************************************
+* Description:
+   * Set/clear hidden service in an accessory
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_service_set_hidden( wiced_homekit_services_t* service, wiced_bool_t hidden_service );
+************************************************************************************************************************
+* Description:
+   * Add relay service to the accessory
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_add_relay_service( wiced_homekit_accessories_t* accessory, uint16_t instance_id,
+                                                     const char* rootca_cert, uint32_t rootca_cert_len );
+************************************************************************************************************************
+* Description:
+   * Remove relay service from the accessory
+* Location(s):
+   * libraries/mfi/apple_homekit/apple_homekit.h
+* Definition(s):
+   * wiced_result_t wiced_homekit_remove_relay_service( wiced_homekit_accessories_t* accessory );
+************************************************************************************************************************
+* Description:
+   * Starts a Websocket server
+* Location(s):
+   * libraries/websocket/websocket.h
+* Definition(s):
+   * wiced_result_t wiced_websocket_server_start( wiced_websocket_server_t* server, wiced_websocket_server_config_t* config,
+                                                  wiced_websocket_callbacks_t* callbacks, wiced_tls_identity_t* tls_identity );
+************************************************************************************************************************
+* Description:
+   * Stops a Websocket server
+* Location(s):
+   * libraries/websocket/websocket.h
+* Definition(s):
+   * wiced_result_t wiced_websocket_server_stop( wiced_websocket_server_t* server );
+************************************************************************************************************************
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                                Deprecated API's
+========================================================================================================================
+************************************************************************************************************************
+* Description:
+   * All platforms now support MPC so these MPC check APIs are obsoleted
+* Location(s):
+   * wwd_platform_interface.h
+* Deprecated definition(s):
+   * extern wiced_bool_t host_platform_supports_mpc( void );
+   * wwd_result_t wwd_management_wifi_plaform_mpc_init( void );
+************************************************************************************************************************
+* Description:
+   * The API's for Deep Sleep 1 (DS1) and Wake on Wireless Lan (WOWL) have been updated:
+   * The following APIs have been obsoleted;
+   * See wwd_wifi_sleep.h for new Deep-Sleep (DS) and Wake On Wireless LAN (WOWL) API.
+* Location(s):
+   * wwd_wifi_sleep.h
+* Deprecated definition(s):
+   * wwd_result_t wwd_wifi_enter_ds1( wwd_interface_t interface, uint32_t ulp_wait_milliseconds);
+   * wwd_result_t wwd_wifi_exit_ds1( wwd_interface_t interface );
+   * wwd_result_t wwd_wifi_wowl_enable( wwd_interface_t interface, uint32_t wowl_caps, uint32_t wowl_os,
+                                        wl_mkeep_alive_pkt_t *wowl_keepalive_data, uint8_t *pattern_data,
+                                        uint32_t pattern_data_size, uint32_t, host_ip_v4_address );
+   * wwd_result_t wwd_wifi_wowl_disable( wwd_interface_t interface );
+************************************************************************************************************************
+

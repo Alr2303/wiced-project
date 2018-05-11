@@ -1,0 +1,58 @@
+#! /bin/sh
+#
+# init.d script for AirPlay.
+#
+# To install:
+#
+#	sudo cp init.d-airplay /etc/init.d/airplay
+#	sudo update-rc.d airplay defaults
+#
+# To Remove:
+#
+#	sudo rm /etc/init.d/airplay
+#	sudo update-rc.d -f airplay remove
+
+### BEGIN INIT INFO
+# Provides:          airplay
+# Required-Start:    $local_fs $network $remote_fs $syslog bonjour
+# Required-Stop:     $local_fs $network $remote_fs $syslog bonjour
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: AirPlay daemon
+### END INIT INFO
+
+modprobe vc_alsa
+
+case "$1" in
+	start)
+			logger "Starting AirPlay..."
+			echo "Starting AirPlay..."
+			/usr/sbin/airplayd --daemon
+		;;
+	
+	stop)
+			logger "Stopping AirPlay..."
+			echo "Stopping AirPlay..."
+			killall airplayd
+		fi
+		;;
+	
+	reload|force-reload)
+		;;
+	
+	restart)
+		$0 stop
+		$0 start
+		;;
+	
+	status)
+			echo "Please type in: 'ps | grep airplayd'"
+		fi
+		;;
+	
+	*)
+		logger "Unknown command '$1'"
+		echo "Unknown command '$1'"
+		exit 1
+		;;
+esac

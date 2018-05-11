@@ -1,0 +1,10 @@
+NAME := App_copy_wifi_to_sflash
+
+$(NAME)_SOURCES    := copy_wifi_to_sflash.c
+
+#WIFI_FIRMWARE_LOCATION := WIFI_FIRMWARE_IN_RESOURCES
+ifdef MFG_WIFI_FW
+WIFI_FIRMWARE_BIN := firmware/$(WLAN_CHIP)/$(WLAN_CHIP)$(WLAN_CHIP_REVISION)-mfgtest.bin
+else
+WIFI_FIRMWARE_BIN := firmware/$(WLAN_CHIP)/$(WLAN_CHIP)$(WLAN_CHIP_REVISION)$(WLAN_CHIP_BIN_TYPE).bin
+endif

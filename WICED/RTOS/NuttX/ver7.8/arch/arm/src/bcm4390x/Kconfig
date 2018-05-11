@@ -1,0 +1,61 @@
+#
+# $ Copyright Broadcom Corporation $
+#
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_CHIP_BCM4390X
+
+comment "BCM4390X Configuration Options"
+
+config BCM4390X_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+
+config BCM4390X_UART1
+	bool "UART1"
+	default y
+	select ARCH_HAVE_UART1
+
+config BCM4390X_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select SPI_EXCHANGE
+	---help---
+		Support SPI1
+
+config BCM4390X_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select SPI_EXCHANGE
+	---help---
+		Support SPI2
+
+config BCM4390X_DIRECT_SFLASH
+	bool "DIRECT_SFLASH"
+	default y
+
+config BCM4390X_WWD
+	bool "WWD"
+	default y
+	depends on NET
+	select ARCH_HAVE_PHY
+	select ARCH_PHY_INTERRUPT
+
+config BCM4390X_SDHC
+	bool "SDHC"
+	default n
+	depends on MMCSD
+	depends on MMCSD_SDIO
+
+config BCM4390X_USBHOST
+	bool "USBHOST"
+	default n
+	depends on USBHOST
+
+endif # ARCH_CHIP_BCM4390X

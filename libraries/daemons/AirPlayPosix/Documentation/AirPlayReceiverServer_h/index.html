@@ -1,0 +1,597 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+    "http://www.w3.org/TR/1998/REC-html40-19980424/loose.dtd">
+<html><head>
+    <title>AirPlay Server Platform APIs</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <meta name="generator" content="HeaderDoc" />
+<meta name="xcode-display" content="render" />
+<style><!--
+.toc_contents_text {
+    padding-left: 1em;
+    text-indent: -1em;
+}
+
+ul.tocSubEntryList li.tocSubEntry {
+    list-style: none;
+}
+
+#colorbox {
+		display: none;
+}
+.spec_sheet_line {
+		margin-bottom: 1px;
+}
+.collapsible {
+		display: none;
+}
+.toc_leadspace {
+		width: 10; min-width: 10;
+}
+.disclosure_triangle_td {
+		width: 14; min-width: 14;
+		font-size: 10px;
+		vertical-align: middle;
+}
+.specbox td {
+		font-size: 13px;
+}
+.specbox td a {
+		font-size: 13px;
+}
+.specbox td code {
+		font-size: 13px;
+}
+.specbox td tt {
+		font-size: 13px;
+}
+.specbox td pre {
+		font-size: 13px;
+}
+.specbox a {
+		font-size: 12px;
+}
+.disclosure_triangle_td a:hover {
+		text-decoration: none;
+}
+.disclosure_triangle_td a:hover {
+		text-decoration: none;
+}
+.hd_toc_box {
+		padding-top: 10px;
+		padding-right: 15px;
+}.tocSeparator {
+		margin-top: 15px;
+		padding-bottom: 0px;
+		margin-bottom: 0px;
+}
+.tocSubEntryList {
+		margin-left: 0px;
+		padding-left: 40px;
+		padding-top: 0px;
+		margin-top: 2px;
+		padding-bottom: 0px;
+		margin-bottom: 8px;
+}
+.hd_toc_heading_table {
+		margin-top: 2px;
+		margin-bottom: 2px;
+}
+.hd_toc_entry_table {
+		margin-top: 2px;
+		margin-bottom: 2px;
+}
+.tocSubEntry {
+		margin-left: 0px;
+		padding-left: 0px;
+		margin-top: 0px;
+		margin-bottom: 1px;
+}
+.tocSubEntry a {
+		font-size: 10pt;
+}
+.tocSubheading {
+		padding-left: 14px;
+		margin-left: 0px;
+		margin-top: 5px;
+		padding-top: 0px;
+		font-size: 16px;
+		color: #808080;
+}
+
+#tocMenu {
+		border-right: 1px solid #c0c0c0;
+		background-color: #f4f4ff;
+		top:0px;
+		left:0px;
+		width:230px;
+		height:100%;
+}
+#bodyContents {
+		width: auto;
+		padding-left: 15px;
+}
+--></style>
+<script language="JavaScript" type="text/javascript"><!--
+function getNewHTTPObject()
+{
+        var xmlhttp;
+
+        /** Special IE only code ... */
+        /*@cc_on
+          @if (@_jscript_version >= 5)
+              try
+              {
+                  xmlhttp = new ActiveXObject('Msxml2.XMLHTTP');
+              }
+              catch (e)
+              {
+                  try
+                  {
+                      xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+                  }
+                  catch (E)
+                  {
+                      xmlhttp = false;
+                  }
+             }
+          @else
+             xmlhttp = false;
+        @end @*/
+
+        /** Every other browser on the planet */
+        if (!xmlhttp && typeof XMLHttpRequest != 'undefined')
+        {
+            try
+            {
+                xmlhttp = new XMLHttpRequest();
+            }
+            catch (e)
+            {
+                xmlhttp = false;
+            }
+        }
+
+        return xmlhttp;
+}
+
+function hidetoc() {
+	var toc = document.getElementById('tocMenu');
+	var src = toc.getAttribute('src');
+	var xhr = getNewHTTPObject();
+	xhr.open('GET', src, true);
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState == 4) {
+			var toc = document.getElementById('tocMenu');
+			toc.innerHTML = xhr.responseText;
+		}
+	}
+	xhr.send(null);
+	var origURL = parent.document.URL;
+	var contentURL = origURL.substring(origURL.indexOf('?')+1, origURL.length);
+	if (contentURL.length == origURL.length) {
+		jumpPos = origURL.substring(origURL.indexOf('#')+1, origURL.length);
+	}
+	if (contentURL == "hidetoc") {
+		var body = document.getElementById('bodyContents');
+		if (toc && body) {
+			toc.style.display = 'none';
+			body.style.marginLeft = '0px';
+		}
+	}
+}
+
+function disclosure_triangle(elt) {
+   var linkelt = elt;
+   while (elt && elt.tagName != 'TABLE') { elt = elt.parentNode;}
+   if (!elt) { return; }
+   while (elt && elt.tagName != 'DIV') { elt = elt.nextSibling;}
+   if (!elt) { return; }
+   if (parseInt(linkelt.getAttribute('state'))) {
+      // It's open.  Close it
+      linkelt.innerHTML = '&#x25B7;';
+      linkelt.setAttribute('state', 0);
+      linkelt.setAttribute('class', 'closed_disclosure_triangle');
+      elt.style.display = 'none';
+   } else {
+      // It's closed.  Open it
+      linkelt.innerHTML = '&#x25BC;';
+      linkelt.setAttribute('state', 1);
+      linkelt.setAttribute('class', 'open_disclosure_triangle');
+      elt.style.display = 'block';
+   }
+}
+--></script>
+<style type="text/css"><!--div {font-size: 10pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000;}td {font-size: 10pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000;}span.hd_tocAccessSpace { display: block; font-size: 1px; height: 3px; min-height: 3px; }span.hd_tocGroupSpace { display: block; font-size: 1px; height: 3px; min-height: 3px; }span.hd_tocGroup { display: block; font-weight: bold; font-size: 10pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000; margin-left: 0px; padding-left: 40px; }span.hd_tocGroup + span.hd_tocAccess { padding-top: 5px; }td.toc_contents_text {font-size: 11pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000; }li.tocSubEntry {font-size: 11pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000;}p {font-size: 10pt; text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #000000;}a:link {text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #36c;}a:visited {text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #36c;}a:visited:hover {text-decoration: underline; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #36c;}a:active {text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #36c;}a:hover {text-decoration: underline; font-family: lucida grande, geneva, helvetica, arial, sans-serif; color: #36c;}h2.h2tight { margin-top: 0px; padding-top: 0px; }h1 { margin-top: 13px; padding-top: 0px; }h4 {text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; font-size: tiny; font-weight: bold;}h5 {text-decoration: none; font-family: lucida grande, geneva, helvetica, arial, sans-serif; font-size: 10.1pt; font-weight: bold;}pre {text-decoration: none; font-family: Courier, Consolas, monospace; color: #666; font-size: 10pt;}pre a { font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt;}pre a:link { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}pre a:visited { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}pre a:visited:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}pre a:active { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}pre a:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}code {text-decoration: none; font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt;}code a { font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt;}code a:link { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}code a:visited { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}code a:visited:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}code a:active { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}code a:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}tt {text-decoration: none; font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt;}tt a { font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt;}tt a:link { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}tt a:visited { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}tt a:visited:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}tt a:active { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}tt a:hover { font-family: Courier, Consolas, monospace; color: #36c;font-size: 10pt;}body  {text-decoration: none; font-family: Courier, Consolas, monospace; color: #666;font-size: 10pt; padding-left: 0px; padding-top: 0px; margin-left: 0px; margin-top: 0px; border: none; }#hd_outermost_table { margin-left: 0px; border-spacing: 0px; margin-top: 0px; padding-left: 0px; padding-top: 0px; border: none; }#hd_outermost_table > tr { border-spacing: 0px; margin-left: 0px; margin-top: 0px; padding-left: 0px; padding-top: 0px; border: none; }#hd_outermost_table > tr > td { border-spacing: 0px; margin-left: 0px; margin-top: 0px; }#hd_outermost_table > tbody > tr { border-spacing: 0px; margin-left: 0px; margin-top: 0px; padding-left: 0px; padding-top: 0px; border: none; }#hd_outermost_table > tbody > tr > td { border-spacing: 0px; margin-left: 0px; margin-top: 0px; padding-top: 3px; }.afterName { display: none; }.list_indent { margin-left: 40px; }.declaration_indent { margin-left: 40px; margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; min-height: 12px; vertical-align: middle; }.declaration_indent pre { margin-top: 20px; padding-top: 0px; margin-bottom: 20px; padding-bottom: 0px; }.gapBeforeFooter { display: none; }hr { height: 0px; min-height: 0px; border-top: none; border-left: none; border-right: none; border-bottom: 1px solid #909090;}hr.afterHeader { display: none }.param_group_indent { margin-left: 25px; }.param_indent { margin-left: 40px; margin-top: 0px; padding-top: 0px; }.param_indent dl { margin-top: 4px; padding-top: 0px; }dl dd > p:first-child { margin-top: 2px; padding-top: 0px; }.param_indent dl dd > p:first-child { margin-top: 2px; padding-top: 0px; }.group_indent { margin-left: 40px; }.group_desc_indent { margin-left: 20px; }.warning_indent { margin-left: 40px; }.important_indent { margin-left: 40px; }.note_indent { margin-left: 40px; }h3 {       color: #3C4C6C;}.tight {       margin-top: 2px; margin-bottom: 0px;       padding-top: 0px; padding-bottom: 0px;}h3 a {       color: #3C4C6C;	font-size: 16px;	font-style: normal;	font-variant: normal;	font-weight: bold;	height: 0px;	line-height: normal;}.hd_tocAccess { display: block; margin-left: 40px; font-style: italic; font-size: 10px; font-weight: normal; color: #303030; }.tocSubheading { margin-bottom: 4px; }--></style></head><body bgcolor="#ffffff" onload="hidetoc();" >
+<!-- headerDoc=Header;  uid=//apple_ref/doc/header/AirPlayReceiverServer.h;   name=AirPlay Server Platform APIs -->
+<a name="//apple_ref/doc/header/AirPlayReceiverServer.h"></a>
+<table id="hd_outermost_table" height="100%" width="100%"><tr><td valign='top' id='tocMenu' src='toc.html'></td>
+<td id='bodyContents' valign='top'>
+<a name="top"></a>
+<h1><a name="AirPlayServerPlatformAPIs">AirPlay Server Platform APIs</a></h1>
+<div class="spec_sheet_info_box"><table cellspacing="0" class="specbox">
+<tr><td scope="row"><b>Includes:</b></td><td><div style="margin-bottom:1px"><div class="content_text"><!-- a logicalPath="//apple_ref/doc/header/AirPlayCommon.h" machineGenerated="true" -->"AirPlayCommon.h"<!-- /a --><br>
+<!-- a logicalPath="//apple_ref/doc/header/CFUtils.h" machineGenerated="true" -->"CFUtils.h"<!-- /a --><br>
+<!-- a logicalPath="//apple_ref/doc/header/CommonServices.h" machineGenerated="true" -->"CommonServices.h"<!-- /a --><br>
+<!-- a logicalPath="//apple_ref/doc/header/DebugServices.h" machineGenerated="true" -->"DebugServices.h"<!-- /a --><br>
+<!-- a logicalPath="//apple_ref/doc/header/dns_sd.h" machineGenerated="true" -->"dns_sd.h"<!-- /a --></div></div></td></tr>
+</table></div>
+<h2>Introduction</h2>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/doc/header/AirPlayReceiverServer.h;name=start --><p>Platform APIs related to AirPlay Server.
+<!-- headerDoc=discussion;uid=//apple_ref/doc/header/AirPlayReceiverServer.h;name=end --><!-- end discussion -->
+<hr class="afterClassOrHeaderInfo"><br><a name="HeaderDoc_functions"></a>
+<h2 class="h2tight">Functions</h2>
+<dl>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPlatformControl" target="_top">AirPlayReceiverServerPlatformControl</a></tt></dt>
+<dd><p>Controls the platform-specific aspects of the server.
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty" target="_top">AirPlayReceiverServerPlatformCopyProperty</a></tt></dt>
+<dd><p>Copies/gets a platform-specific property from the server.
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize" target="_top">AirPlayReceiverServerPlatformFinalize</a></tt></dt>
+<dd><p>Finalizes the platform-specific aspects of the server. Called once when the server is released.
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize" target="_top">AirPlayReceiverServerPlatformInitialize</a></tt></dt>
+<dd><p>Initializes the platform-specific aspects of the server. Called once when the server is created.
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty" target="_top">AirPlayReceiverServerPlatformSetProperty</a></tt></dt>
+<dd><p>Sets a platform-specific property on the server.
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerPostEvent" target="_top">AirPlayReceiverServerPostEvent</a></tt></dt>
+<dd><p>Post events to AirPlay stack to notify of platform changes
+</p>
+</dd>
+<dt><tt><a href="index.html#//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand" target="_top">AirPlayReceiverServerSendDACPCommand</a></tt></dt>
+<dd><p>Sends a DACP command from the accessory to the controller.
+</p>
+</dd>
+</dl>
+<hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;   name=AirPlayReceiverServerPlatformControl -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPlatformControl"></a>
+<h3><a name="AirPlayReceiverServerPlatformControl">AirPlayReceiverServerPlatformControl</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=start --><!-- begin abstract --><p>Controls the platform-specific aspects of the server.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=start --><!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPlatformControl //apple_ref/c/clm/AirPlayReceiverServerPlatformControl //apple_ref/c/intfcm/AirPlayReceiverServerPlatformControl //apple_ref/c/intfm/AirPlayReceiverServerPlatformControl //apple_ref/c/func/AirPlayReceiverServerPlatformControl //apple_ref/c/ftmplt/AirPlayReceiverServerPlatformControl //apple_ref/c/defn/AirPlayReceiverServerPlatformControl //apple_ref/c/macro/AirPlayReceiverServerPlatformControl //apple_ref/doc/anysymbol/AirPlayReceiverServerPlatformControl" machineGenerated="true" --><span class="function">AirPlayReceiverServerPlatformControl</span><!-- /a -->( 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inServer</span>, <span class="comment">// Must be AirPlayReceiverServerRef.</span> 
+    <!-- a logicalPath="//apple_ref/c/cl/uint32_t //apple_ref/c/tdef/uint32_t //apple_ref/c/tag/uint32_t //apple_ref/c/struct/uint32_t //apple_ref/c/intf/uint32_t //apple_ref/doc/anysymbol/uint32_t" machineGenerated="true" --><span class="type">uint32_t</span><!-- /a --> <span class="param">inFlags</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFStringRef //apple_ref/c/tdef/CFStringRef //apple_ref/c/tag/CFStringRef //apple_ref/c/struct/CFStringRef //apple_ref/c/intf/CFStringRef //apple_ref/doc/anysymbol/CFStringRef" machineGenerated="true" --><span class="type">CFStringRef</span><!-- /a --> <span class="param">inCommand</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inQualifier</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFDictionaryRef //apple_ref/c/tdef/CFDictionaryRef //apple_ref/c/tag/CFDictionaryRef //apple_ref/c/struct/CFDictionaryRef //apple_ref/c/intf/CFDictionaryRef //apple_ref/doc/anysymbol/CFDictionaryRef" machineGenerated="true" --><span class="type">CFDictionaryRef</span><!-- /a --> <span class="param">inParams</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFDictionaryRef //apple_ref/c/tdef/CFDictionaryRef //apple_ref/c/tag/CFDictionaryRef //apple_ref/c/struct/CFDictionaryRef //apple_ref/c/intf/CFDictionaryRef //apple_ref/doc/anysymbol/CFDictionaryRef" machineGenerated="true" --><span class="type">CFDictionaryRef</span><!-- /a --> <span class="type">*</span><span class="param">outParams</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier of the AirPlay Server</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inFlags;   name=inFlags -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inFlags"></a>
+<code>inFlags</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inCommand;   name=inCommand -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inCommand"></a>
+<code>inCommand</code></dt><dd><p>Command:</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inQualifier;   name=inQualifier -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inQualifier"></a>
+<code>inQualifier</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inParams;   name=inParams -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/inParams"></a>
+<code>inParams</code></dt><dd><p>Parameter for the command specified</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/outParams;   name=outParams -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformControl/outParams"></a>
+<code>outParams</code></dt><dd><p>Output parameter returned by the function</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+</p>
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=start --><p>The following commands need to be handled:
+	</p>
+<pre>
+	
+
+              inCommand                      inParams         outParams
+              ----------                     --------         ---------
+        - kAirPlayCommand_SetConfig           CFDict            CFDict
+             Set WiFi Access Point Configuration to be used
+
+        - kAirPlayCommand_ApplyConfig          None              None
+             Apply the previously ser WiFi Access Point Configuration to be used
+
+        - kAirPlayCommand_StartServer          None              None
+             Perform Platform specific operation for AirPlay server start
+
+        - kAirPlayCommand_StopServer           None              None
+             Perform Platform specific operation for AirPlay server stop
+
+        - kAirPlayCommand_UpdatePrefs          None              None
+             Reload Platform specific preferences
+
+	
+	</pre>
+
+<!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformControl;name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;   name=AirPlayReceiverServerPlatformCopyProperty -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty"></a>
+<h3><a name="AirPlayReceiverServerPlatformCopyProperty">AirPlayReceiverServerPlatformCopyProperty</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=start --><!-- begin abstract --><p>Copies/gets a platform-specific property from the server.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=start --><!-- a logicalPath="//apple_ref/c/cl/CF_RETURNS_RETAINED //apple_ref/c/tdef/CF_RETURNS_RETAINED //apple_ref/c/tag/CF_RETURNS_RETAINED //apple_ref/c/struct/CF_RETURNS_RETAINED //apple_ref/c/intf/CF_RETURNS_RETAINED //apple_ref/doc/anysymbol/CF_RETURNS_RETAINED" machineGenerated="true" --><span class="type">CF_RETURNS_RETAINED</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/clm/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/intfcm/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/intfm/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/ftmplt/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/defn/AirPlayReceiverServerPlatformCopyProperty //apple_ref/c/macro/AirPlayReceiverServerPlatformCopyProperty //apple_ref/doc/anysymbol/AirPlayReceiverServerPlatformCopyProperty" machineGenerated="true" --><span class="function">AirPlayReceiverServerPlatformCopyProperty</span><!-- /a -->( 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inServer</span>, <span class="comment">// Must be AirPlayReceiverServerRef.</span> 
+    <!-- a logicalPath="//apple_ref/c/cl/uint32_t //apple_ref/c/tdef/uint32_t //apple_ref/c/tag/uint32_t //apple_ref/c/struct/uint32_t //apple_ref/c/intf/uint32_t //apple_ref/doc/anysymbol/uint32_t" machineGenerated="true" --><span class="type">uint32_t</span><!-- /a --> <span class="param">inFlags</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFStringRef //apple_ref/c/tdef/CFStringRef //apple_ref/c/tag/CFStringRef //apple_ref/c/struct/CFStringRef //apple_ref/c/intf/CFStringRef //apple_ref/doc/anysymbol/CFStringRef" machineGenerated="true" --><span class="type">CFStringRef</span><!-- /a --> <span class="param">inProperty</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inQualifier</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <span class="type">*</span><span class="param">outErr</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier of the AirPlay Server</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inFlags;   name=inFlags -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inFlags"></a>
+<code>inFlags</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inProperty;   name=inProperty -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inProperty"></a>
+<code>inProperty</code></dt><dd><p>Property to be copied</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inQualifier;   name=inQualifier -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/inQualifier"></a>
+<code>inQualifier</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/outErr;   name=outErr -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformCopyProperty/outErr"></a>
+<code>outErr</code></dt><dd><p>Status of the copy operation</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>CFRetained copy of the value of the property specified. 
+</p>
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=start --><p>The following properties need to be handled:
+	</p>
+<pre>
+	
+
+              inProperty                                result
+              ----------                                ------
+        - kAirPlayProperty_AudioJackStatus              CFSTR   
+             Return the status of the audio jack. Possible values are:
+                            kAirPlayAudioJackStatus_Disconnected
+                            kAirPlayAudioJackStatus_ConnectedAnalog
+                            kAirPlayAudioJackStatus_ConnectedDigital
+                            kAirPlayAudioJackStatus_ConnectedUnknown
+
+        - kAirPlayProperty_Features                     CFNUMBER (kCFNumberSInt64Type)
+             Return the features (bitwise ORed) supported by the accessory. Possible values are:
+                            kAirPlayFeature_AudioMetaDataArtwork
+                            kAirPlayFeature_AudioMetaDataProgress
+                            kAirPlayFeature_AudioMetaDataText
+
+        - kAirPlayProperty_PlaybackAllowed              CFBOOLEAN 
+             Return true if Airplay playback is currently allowed. Possible values are:
+                            kCFBooleanFalse
+                            kCFBooleanTrue
+
+        - kAirPlayProperty_SkewCompensation             CFBOOLEAN 
+             Return true if the platform supports its own fine-grained skew compensation.
+                            kCFBooleanFalse
+                            kCFBooleanTrue
+
+        - kAirPlayProperty_StatusFlags                  CFNUMBER (kCFNumberSInt64Type)
+             Return the status (bitwise ORed) of the accessory. Possible values are:
+                            kAirPlayStatusFlag_None
+                            kAirPlayStatusFlag_Unconfigured
+                            kAirPlayStatusFlag_AudioLink
+                            kAirPlayStatusFlag_PasswordRequired         
+
+	
+	</pre>
+
+<!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformCopyProperty;name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize;   name=AirPlayReceiverServerPlatformFinalize -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize"></a>
+<h3><a name="AirPlayReceiverServerPlatformFinalize">AirPlayReceiverServerPlatformFinalize</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize;name=start --><!-- begin abstract --><p>Finalizes the platform-specific aspects of the server. Called once when the server is released.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize;name=start --><!-- a logicalPath="//apple_ref/c/cl/void //apple_ref/c/tdef/void //apple_ref/c/tag/void //apple_ref/c/struct/void //apple_ref/c/intf/void //apple_ref/doc/anysymbol/void" machineGenerated="true" --><span class="type">void</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPlatformFinalize //apple_ref/c/clm/AirPlayReceiverServerPlatformFinalize //apple_ref/c/intfcm/AirPlayReceiverServerPlatformFinalize //apple_ref/c/intfm/AirPlayReceiverServerPlatformFinalize //apple_ref/c/func/AirPlayReceiverServerPlatformFinalize //apple_ref/c/ftmplt/AirPlayReceiverServerPlatformFinalize //apple_ref/c/defn/AirPlayReceiverServerPlatformFinalize //apple_ref/c/macro/AirPlayReceiverServerPlatformFinalize //apple_ref/doc/anysymbol/AirPlayReceiverServerPlatformFinalize" machineGenerated="true" --><span class="function">AirPlayReceiverServerPlatformFinalize</span><!-- /a -->(
+    <!-- a logicalPath="//apple_ref/c/cl/AirPlayReceiverServerRef //apple_ref/c/tdef/AirPlayReceiverServerRef //apple_ref/c/tag/AirPlayReceiverServerRef //apple_ref/c/struct/AirPlayReceiverServerRef //apple_ref/c/intf/AirPlayReceiverServerRef //apple_ref/doc/anysymbol/AirPlayReceiverServerRef" machineGenerated="true" --><span class="type">AirPlayReceiverServerRef</span><!-- /a --> <span class="param">inServer</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformFinalize;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformFinalize/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformFinalize/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier for the AirPlay Server being released</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize;   name=AirPlayReceiverServerPlatformInitialize -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize"></a>
+<h3><a name="AirPlayReceiverServerPlatformInitialize">AirPlayReceiverServerPlatformInitialize</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize;name=start --><!-- begin abstract --><p>Initializes the platform-specific aspects of the server. Called once when the server is created.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize;name=start --><!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPlatformInitialize //apple_ref/c/clm/AirPlayReceiverServerPlatformInitialize //apple_ref/c/intfcm/AirPlayReceiverServerPlatformInitialize //apple_ref/c/intfm/AirPlayReceiverServerPlatformInitialize //apple_ref/c/func/AirPlayReceiverServerPlatformInitialize //apple_ref/c/ftmplt/AirPlayReceiverServerPlatformInitialize //apple_ref/c/defn/AirPlayReceiverServerPlatformInitialize //apple_ref/c/macro/AirPlayReceiverServerPlatformInitialize //apple_ref/doc/anysymbol/AirPlayReceiverServerPlatformInitialize" machineGenerated="true" --><span class="function">AirPlayReceiverServerPlatformInitialize</span><!-- /a -->(
+    <!-- a logicalPath="//apple_ref/c/cl/AirPlayReceiverServerRef //apple_ref/c/tdef/AirPlayReceiverServerRef //apple_ref/c/tag/AirPlayReceiverServerRef //apple_ref/c/struct/AirPlayReceiverServerRef //apple_ref/c/intf/AirPlayReceiverServerRef //apple_ref/doc/anysymbol/AirPlayReceiverServerRef" machineGenerated="true" --><span class="type">AirPlayReceiverServerRef</span><!-- /a --> <span class="param">inServer</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformInitialize;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformInitialize/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformInitialize/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier for the AirPlay Server being initialized</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+
+<!-- end return value --></p><hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;   name=AirPlayReceiverServerPlatformSetProperty -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty"></a>
+<h3><a name="AirPlayReceiverServerPlatformSetProperty">AirPlayReceiverServerPlatformSetProperty</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=start --><!-- begin abstract --><p>Sets a platform-specific property on the server.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=start --><!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/clm/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/intfcm/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/intfm/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/ftmplt/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/defn/AirPlayReceiverServerPlatformSetProperty //apple_ref/c/macro/AirPlayReceiverServerPlatformSetProperty //apple_ref/doc/anysymbol/AirPlayReceiverServerPlatformSetProperty" machineGenerated="true" --><span class="function">AirPlayReceiverServerPlatformSetProperty</span><!-- /a -->( 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inServer</span>, <span class="comment">// Must be AirPlayReceiverServerRef.</span> 
+    <!-- a logicalPath="//apple_ref/c/cl/uint32_t //apple_ref/c/tdef/uint32_t //apple_ref/c/tag/uint32_t //apple_ref/c/struct/uint32_t //apple_ref/c/intf/uint32_t //apple_ref/doc/anysymbol/uint32_t" machineGenerated="true" --><span class="type">uint32_t</span><!-- /a --> <span class="param">inFlags</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFStringRef //apple_ref/c/tdef/CFStringRef //apple_ref/c/tag/CFStringRef //apple_ref/c/struct/CFStringRef //apple_ref/c/intf/CFStringRef //apple_ref/doc/anysymbol/CFStringRef" machineGenerated="true" --><span class="type">CFStringRef</span><!-- /a --> <span class="param">inProperty</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inQualifier</span>, 
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inValue</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier of the AirPlay Server</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inFlags;   name=inFlags -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inFlags"></a>
+<code>inFlags</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inProperty;   name=inProperty -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inProperty"></a>
+<code>inProperty</code></dt><dd><p>Property to be set</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inQualifier;   name=inQualifier -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inQualifier"></a>
+<code>inQualifier</code></dt><dd><p>-</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inValue;   name=inValue -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPlatformSetProperty/inValue"></a>
+<code>inValue</code></dt><dd><p>Value to be set</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+</p>
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=start --><p>The following properties need to be handled:
+	</p>
+<pre>
+	
+
+              inProperty                                
+              ----------                               
+                   -                                  
+
+	
+	</pre>
+
+<!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPlatformSetProperty;name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;   name=AirPlayReceiverServerPostEvent -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerPostEvent"></a>
+<h3><a name="AirPlayReceiverServerPostEvent">AirPlayReceiverServerPostEvent</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=start --><!-- begin abstract --><p>Post events to AirPlay stack to notify of platform changes
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=start --><!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerPostEvent //apple_ref/c/clm/AirPlayReceiverServerPostEvent //apple_ref/c/intfcm/AirPlayReceiverServerPostEvent //apple_ref/c/intfm/AirPlayReceiverServerPostEvent //apple_ref/c/func/AirPlayReceiverServerPostEvent //apple_ref/c/ftmplt/AirPlayReceiverServerPostEvent //apple_ref/c/defn/AirPlayReceiverServerPostEvent //apple_ref/c/macro/AirPlayReceiverServerPostEvent //apple_ref/doc/anysymbol/AirPlayReceiverServerPostEvent" machineGenerated="true" --><span class="function">AirPlayReceiverServerPostEvent</span><!-- /a -->(
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inServer</span>,
+    <!-- a logicalPath="//apple_ref/c/cl/CFStringRef //apple_ref/c/tdef/CFStringRef //apple_ref/c/tag/CFStringRef //apple_ref/c/struct/CFStringRef //apple_ref/c/intf/CFStringRef //apple_ref/doc/anysymbol/CFStringRef" machineGenerated="true" --><span class="type">CFStringRef</span><!-- /a --> <span class="param">inEvent</span>,
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inQualifier</span>,
+    <!-- a logicalPath="//apple_ref/c/cl/CFDictionaryRef //apple_ref/c/tdef/CFDictionaryRef //apple_ref/c/tag/CFDictionaryRef //apple_ref/c/struct/CFDictionaryRef //apple_ref/c/intf/CFDictionaryRef //apple_ref/doc/anysymbol/CFDictionaryRef" machineGenerated="true" --><span class="type">CFDictionaryRef</span><!-- /a --> <span class="param">inParams</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier of the AirPlay Server</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inEvent;   name=inEvent -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inEvent"></a>
+<code>inEvent</code></dt><dd><p>Even being notified</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inQualifier;   name=inQualifier -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inQualifier"></a>
+<code>inQualifier</code></dt><dd><p>Reserved</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inParams;   name=inParams -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerPostEvent/inParams"></a>
+<code>inParams</code></dt><dd><p>Reserved</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+</p>
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=start --><p>Platform should call this function to notify AirPlay stack of the following events:
+</p>
+	<pre>
+	
+
+              inEvent
+              -------
+        - kAirPlayEvent_PrefsChanged
+             Notify AirPlay about change in accessory preference like password change, name change etc.
+
+	
+	</pre>
+
+<!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerPostEvent;name=end --><!-- end discussion -->
+<hr class="betweenAPIEntries"><!-- headerDoc=func;  uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;   name=AirPlayReceiverServerSendDACPCommand -->
+<a name="//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand"></a>
+<h3><a name="AirPlayReceiverServerSendDACPCommand">AirPlayReceiverServerSendDACPCommand</a></h3>
+<hr class="afterName"><p><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=start --><!-- begin abstract --><p>Sends a DACP command from the accessory to the controller.
+</p>
+<!-- end abstract --><!-- headerDoc=abstract;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=end --></p>
+<div class='declaration_indent'>
+<pre><!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=start --><!-- a logicalPath="//apple_ref/c/cl/OSStatus //apple_ref/c/tdef/OSStatus //apple_ref/c/tag/OSStatus //apple_ref/c/struct/OSStatus //apple_ref/c/intf/OSStatus //apple_ref/doc/anysymbol/OSStatus" machineGenerated="true" --><span class="type">OSStatus</span><!-- /a --> <!-- a logicalPath="//apple_ref/c/instm/AirPlayReceiverServerSendDACPCommand //apple_ref/c/clm/AirPlayReceiverServerSendDACPCommand //apple_ref/c/intfcm/AirPlayReceiverServerSendDACPCommand //apple_ref/c/intfm/AirPlayReceiverServerSendDACPCommand //apple_ref/c/func/AirPlayReceiverServerSendDACPCommand //apple_ref/c/ftmplt/AirPlayReceiverServerSendDACPCommand //apple_ref/c/defn/AirPlayReceiverServerSendDACPCommand //apple_ref/c/macro/AirPlayReceiverServerSendDACPCommand //apple_ref/doc/anysymbol/AirPlayReceiverServerSendDACPCommand" machineGenerated="true" --><span class="function">AirPlayReceiverServerSendDACPCommand</span><!-- /a -->(
+    <!-- a logicalPath="//apple_ref/c/cl/CFTypeRef //apple_ref/c/tdef/CFTypeRef //apple_ref/c/tag/CFTypeRef //apple_ref/c/struct/CFTypeRef //apple_ref/c/intf/CFTypeRef //apple_ref/doc/anysymbol/CFTypeRef" machineGenerated="true" --><span class="type">CFTypeRef</span><!-- /a --> <span class="param">inServer</span>,
+    <!-- a logicalPath="//apple_ref/c/cl/CFStringRef //apple_ref/c/tdef/CFStringRef //apple_ref/c/tag/CFStringRef //apple_ref/c/struct/CFStringRef //apple_ref/c/intf/CFStringRef //apple_ref/doc/anysymbol/CFStringRef" machineGenerated="true" --><span class="type">CFStringRef</span><!-- /a --> <span class="param">inCommand</span> );  <!-- headerDoc=declaration;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=end --></pre>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Parameters</font></h5>
+<div class='param_indent'>
+<dl>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerSendDACPCommand/inServer;   name=inServer -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerSendDACPCommand/inServer"></a>
+<code>inServer</code></dt><dd><p>Server Identifier of the AirPlay Server</dd>
+<dt><!-- headerDoc=functionparam;  uid=//apple_ref/doc/functionparam/AirPlayReceiverServerSendDACPCommand/inCommand;   name=inCommand -->
+<a name="//apple_ref/doc/functionparam/AirPlayReceiverServerSendDACPCommand/inCommand"></a>
+<code>inCommand</code></dt><dd><p>C string DACP command to send. See DACPCommon.h for string constants.</dd>
+</dl>
+</div>
+<h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Return Value</font></h5><p><!-- begin return value --><p>kNoErr if successful or an error code indicating failure.
+</p>
+
+<!-- end return value --></p><h5 class="tight"><font face="Lucida Grande,Helvetica,Arial">Discussion</font></h5>
+<!-- begin discussion --><!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=start --><p>Platform should call this function to send DACP commands to the controlling device. 
+</p>
+	<pre>
+	
+              inCommand
+              ---------
+        - kDACPCommandStr_BeginFastFwd
+        - kDACPCommandStr_BeginRewind
+        - kDACPCommandStr_MuteToggle
+        - kDACPCommandStr_NextItem
+        - kDACPCommandStr_Pause
+        - kDACPCommandStr_Play
+        - kDACPCommandStr_PlayPause
+        - kDACPCommandStr_PlayResume
+        - kDACPCommandStr_PrevItem
+        - kDACPCommandStr_SetProperty
+        - kDACPCommandStr_ShuffleToggle
+        - kDACPCommandStr_Stop
+        - kDACPCommandStr_VolumeDown
+        - kDACPCommandStr_VolumeUp
+        - kDACPProperty_DevicePreventPlayback
+        - kDACPProperty_DeviceBusy
+        - kDACPProperty_DeviceVolume
+
+	
+	</pre>
+
+<!-- headerDoc=discussion;uid=//apple_ref/c/func/AirPlayReceiverServerSendDACPCommand;name=end --><!-- end discussion -->
+<p class="gapBeforeFooter">&nbsp;</p><hr class="afterFooter"><div class="hd_copyright_and_timestamp">
+<p class="hd_timestamp">Last Updated: August 21, 2013
+</p></div>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,13 @@
+#
+# $ Copyright Broadcom Corporation $
+#
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_BCM4390X_WCD1_3
+
+comment "BCM4390X_WCD1_3 Board Configuration Options"
+
+endif # ARCH_BOARD_BCM4390X_WCD1_3
