@@ -189,6 +189,7 @@ _error:
 	memset(&host_ip, 0, sizeof(host_ip));
 	wiced_rtos_deinit_semaphore(&semaphore);
 _coap_err:
+	wiced_framework_reboot();
 	return WICED_ERROR;
 }
 
