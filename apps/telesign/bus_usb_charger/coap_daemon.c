@@ -92,7 +92,7 @@ wiced_result_t coap_post_data(char* path, char* data, size_t len)
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sent Post: %s - %s\n", path ? path : "server" , data);
 	require_noerr(wiced_coap_client_post(&coap_client, &request, WICED_COAP_MSGTYPE_CON, host_ip, COAP_TARGET_PORT), _error);
 	require_noerr(coap_wait_for(WICED_COAP_CLIENT_EVENT_TYPE_POSTED, WICED_COAP_TIMEOUT), _error);
-	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Ack OK\n");
+	/* wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Ack OK\n"); */
 	return WICED_SUCCESS;
 
 _error:
@@ -103,12 +103,12 @@ static wiced_result_t coap_client_callback(wiced_coap_client_event_info_t event_
 {
 	switch(event_info.type) {
         case WICED_COAP_CLIENT_EVENT_TYPE_POSTED:
-		wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Posted\n");
+		/* wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Posted\n"); */
 		expected_event = event_info.type;
 		wiced_rtos_set_semaphore(&semaphore);
 		break;
         case WICED_COAP_CLIENT_EVENT_TYPE_GET_RECEIVED:
-		wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Data Receved\n");
+		/* wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Data Receved\n"); */
 		expected_event = event_info.type;
 		wiced_rtos_set_semaphore(&semaphore);
 		break;
