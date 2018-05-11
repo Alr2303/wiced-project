@@ -66,7 +66,7 @@ static const command_t cons_commands[] = {
 
 #define VALID_VOLTAGE_ADC	500
 #define VALID_IDLE_CURRNET_ADC	50
-#define VALID_TEST_CURRENT_ADC	400
+#define VALID_TEST_CURRENT_ADC	390
 
 #define ERR_LOW_VOLTAGE		(1 << 0)
 #define ERR_USB_TEST		(1 << 1)
@@ -155,6 +155,7 @@ static wiced_result_t sensor_post(void *arg)
 		require_noerr(coap_post_int("voltage", state.voltage), _err);
 		require_noerr(coap_post_int("current", state.current), _err);
 		require_noerr(coap_post_int("fail", state.fail), _err);
+		usb_post(0);
 	}
 _err:
 	return WICED_SUCCESS;
@@ -174,7 +175,7 @@ static void charging_test(void)
 
 	state.test_process = WICED_FALSE;
 
-	if (current > VALID_TEST_CURRENT_ADC) {
+	if (current < VALID_TEST_CURRENT_ADC) {
 		state.fail |= ERR_USB_TEST;
 	} else {
 		state.fail &= ~ERR_USB_TEST;
@@ -250,6 +251,7 @@ void application_start(void) {
 
 	usb_detect_fn(0, 0);
 	sensor_process(0);
+	charging_test();
 
 	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
 
