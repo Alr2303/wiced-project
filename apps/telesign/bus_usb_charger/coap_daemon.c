@@ -138,7 +138,7 @@ static wiced_result_t coap_init(void *arg)
 
 	wiced_rtos_init_semaphore(&semaphore);
 
-#if 1
+#if 0
 	res = gedday_init(WICED_STA_INTERFACE, "CoAP Discovery");
 	require_noerr(res, _error);
 
@@ -156,7 +156,7 @@ static wiced_result_t coap_init(void *arg)
 	host_ip.ip.v4 = ntohl(host_ip.ip.v4);
 	gedday_deinit();
 #else
-	wiced_hostname_lookup("192.168.10.3", &host_ip, 10000, WICED_STA_INTERFACE);
+	wiced_hostname_lookup("192.168.0.2", &host_ip, 10000, WICED_STA_INTERFACE);
 #endif
 	require(host_ip.version == WICED_IPV4, _error);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "IP: " IPV4_PRINT_FORMAT "\n",
