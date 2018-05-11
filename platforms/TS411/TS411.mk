@@ -30,14 +30,14 @@
  # so agrees to indemnify Cypress against all liability.
 #
 
-NAME := Platform_TIMONET
+NAME := Platform_TS411
 
 WLAN_CHIP            := 4343W
 WLAN_CHIP_REVISION   := A1
 WLAN_CHIP_FAMILY     := 4343x
 HOST_MCU_FAMILY      := STM32F4xx
-HOST_MCU_VARIANT     := STM32F412
-HOST_MCU_PART_NUMBER := STM32F412VET6
+HOST_MCU_VARIANT     := STM32F411
+HOST_MCU_PART_NUMBER := STM32F411
 BT_CHIP              := 43438
 BT_CHIP_REVISION     := A1
 BT_MODE              ?= HCI

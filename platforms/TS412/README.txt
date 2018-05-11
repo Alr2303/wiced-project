@@ -1,16 +1,15 @@
 --------------------------------------------
-TIMONET
+TS412
 --------------------------------------------
 
 Provider    : Telesign
 Website     : http://www.telesign.co.kr
-Description :  Target for smart bus safety shelter
+Description : Telesign SMT32F412+BCM3434W board 
 
 Schematics & Photos : NA
 
 Module
   Mfr     : Telesign
-  P/N     : Smart Safety Shelter
   MCU     : STM32F412VET6
   WLAN    : BCM4343W Wi-Fi CoB
-  Antenna : Diversity with two printed antenna
+  Antenna : No diversity
