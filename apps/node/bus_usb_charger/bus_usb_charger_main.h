@@ -11,6 +11,7 @@
 #include "app_dct.h"
 
 typedef struct {
+	char server[MAX_SERVER_NAME];
 	char id[MAX_DEVICE_ID];
 	uint32_t fail;		/* fail code */
 	wiced_bool_t usb;	/* charging or not */

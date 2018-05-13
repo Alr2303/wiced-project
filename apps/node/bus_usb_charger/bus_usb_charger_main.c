@@ -224,6 +224,7 @@ static void init_state_info(void) {
 	memset(&state, 0, sizeof(state));
 	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
 			    0, sizeof(app_dct_t));
+	strncpy(state.server, dct->server, sizeof(state.server));
 	strncpy(state.id, dct->device_id, sizeof(state.id));
 	wiced_dct_read_unlock(dct, WICED_FALSE);
 	len = strlen(state.id);

@@ -135,6 +135,7 @@ static wiced_result_t coap_init(void *arg)
 	int i;
 	wiced_result_t res;
 	gedday_service_t service_result;
+	charger_state_t *state;
 
 	wiced_rtos_init_semaphore(&semaphore);
 
@@ -156,7 +157,8 @@ static wiced_result_t coap_init(void *arg)
 	host_ip.ip.v4 = ntohl(host_ip.ip.v4);
 	gedday_deinit();
 #else
-	wiced_hostname_lookup("192.168.0.2", &host_ip, 10000, WICED_STA_INTERFACE);
+	state = a_get_charger_state();
+	wiced_hostname_lookup(state->server, &host_ip, 10000, WICED_STA_INTERFACE);
 #endif
 	require(host_ip.version == WICED_IPV4, _error);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "IP: " IPV4_PRINT_FORMAT "\n",
