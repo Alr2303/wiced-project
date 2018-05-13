@@ -217,21 +217,46 @@ static void sensor_process(void *arg)
 	}
 }
 
+static void init_state_info(void) {
+	int len;
+	app_dct_t* dct;
+
+	memset(&state, 0, sizeof(state));
+	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
+			    0, sizeof(app_dct_t));
+	strncpy(state.id, dct->device_id, sizeof(state.id));
+	wiced_dct_read_unlock(dct, WICED_FALSE);
+	len = strlen(state.id);
+	if (len <= 0 || len >= sizeof(state.id) - 1) { /* empty or full */
+		platform_dct_wifi_config_t* dct_wifi_config;
+		wiced_dct_read_lock((void**)&dct_wifi_config, WICED_TRUE, DCT_WIFI_CONFIG_SECTION,
+				    0, sizeof(platform_dct_wifi_config_t));
+		sprintf(state.id, "%02x%02x%02x%02x%02x%02x",
+			dct_wifi_config->mac_address.octet[0],
+			dct_wifi_config->mac_address.octet[1],
+			dct_wifi_config->mac_address.octet[2],
+			dct_wifi_config->mac_address.octet[3],
+			dct_wifi_config->mac_address.octet[4],
+			dct_wifi_config->mac_address.octet[5]);
+		wiced_dct_read_unlock((void*)dct_wifi_config, WICED_TRUE);
+
+		wiced_dct_read_lock((void**) &dct, WICED_TRUE, DCT_APP_SECTION,
+			    0, sizeof(app_dct_t));
+		memset(dct->device_id, 0, sizeof(dct->device_id));
+		strcpy(dct->device_id, state.id);
+		wiced_dct_write((const void*)dct, DCT_APP_SECTION, 0, sizeof(app_dct_t));
+		wiced_dct_read_unlock(dct, WICED_TRUE);
+	}
+}
 
 void application_start(void) {
-	app_dct_t* dct;
 	wiced_result_t result;
 	WICED_LOG_LEVEL_T level = WICED_LOG_DEBUG0;
 
 	wiced_init();
 
-	memset(&state, 0, sizeof(state));
+	init_state_info();
 	a_set_allow_fast_charge(true);
-
-	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
-			    0, sizeof(app_dct_t));
-	strncpy(state.id, dct->device_id, sizeof(state.id));
-	wiced_dct_read_unlock(dct, WICED_FALSE);
 
 	wiced_log_init(level, log_output_handler, NULL);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "USB Charger Version: v%s\n", fw_version);
