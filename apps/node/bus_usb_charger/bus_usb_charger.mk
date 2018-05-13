@@ -38,4 +38,4 @@ GLOBAL_DEFINES	   += TARGET_BUS_USB_CHARGER
 
 WIFI_CONFIG_DCT_H := $(COMMON)/wifi_config_dct.h
 
-APPLICATION_DCT := $(COMMON)/app_dct.c
+APPLICATION_DCT := app_dct.c
