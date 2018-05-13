@@ -27,6 +27,7 @@
 #define MDNS_SERVICE_COAP	"_coap._udp.local"
 #define TEXT_PLAIN		WICED_COAP_CONTENTTYPE_TEXT_PLAIN
 
+static wiced_bool_t loaded;
 static wiced_semaphore_t semaphore;
 static wiced_coap_client_event_type_t expected_event;
 
@@ -49,6 +50,10 @@ wiced_result_t coap_post_alive(wiced_bool_t reset)
 	int len;
 	char buf[128];
 	charger_state_t *state = a_get_charger_state();
+
+	if (!loaded)
+		return WICED_ERROR;
+
 	len = sprintf(buf, "%s%s", state->id, reset ? ",reset" : "");
 	return coap_post_data("alive", buf, len);
 }
@@ -56,6 +61,10 @@ wiced_result_t coap_post_alive(wiced_bool_t reset)
 wiced_result_t coap_post_int(char* endpoint, int data)
 {
 	char buf[20];
+
+	if (!loaded)
+		return WICED_ERROR;
+
 	sprintf(buf, "%s:%d", endpoint, data);
 	return coap_post_data(NULL, buf, 0);
 }
@@ -63,6 +72,10 @@ wiced_result_t coap_post_int(char* endpoint, int data)
 wiced_result_t coap_post_str(char* endpoint, char* data)
 {
 	char buf[128];
+
+	if (!loaded)
+		return WICED_ERROR;
+
 	sprintf(buf, "%s:%s", endpoint, data);
 	return coap_post_data(NULL, buf, 0);
 }
@@ -81,6 +94,9 @@ static wiced_result_t coap_wait_for(wiced_coap_client_event_type_t event, uint32
 wiced_result_t coap_post_data(char* path, char* data, size_t len)
 {
 	wiced_coap_client_request_t request;
+
+	if (!loaded)
+		return WICED_ERROR;
 
 	memset(&request, 0, sizeof(request));
 	request.payload_type = WICED_COAP_CONTENTTYPE_TEXT_PLAIN;
@@ -137,8 +153,8 @@ static wiced_result_t coap_init(void *arg)
 	gedday_service_t service_result;
 	charger_state_t *state;
 
-	wiced_rtos_init_semaphore(&semaphore);
-
+	if (loaded)
+		return WICED_SUCCESS;
 #if 0
 	res = gedday_init(WICED_STA_INTERFACE, "CoAP Discovery");
 	require_noerr(res, _error);
@@ -177,6 +193,8 @@ static wiced_result_t coap_init(void *arg)
 	require_noerr(wiced_coap_server_add_service(&coap_server, &service[6], "interval", handle_interval, TEXT_PLAIN), _coap_err);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "CoAP Sever Ready\n");
 	
+	loaded = WICED_TRUE;
+
 	for (i = 0; i < 3; i++) {
 		res = coap_post_alive(WICED_TRUE);
 		if (res == WICED_SUCCESS) {
@@ -189,7 +207,6 @@ static wiced_result_t coap_init(void *arg)
 _error:
 	wiced_log_msg(WLF_DEF, WICED_LOG_ERR, "Fail to discover CoAP server\n");
 	memset(&host_ip, 0, sizeof(host_ip));
-	wiced_rtos_deinit_semaphore(&semaphore);
 _coap_err:
 	wiced_framework_reboot();
 	return WICED_ERROR;
@@ -205,6 +222,7 @@ static void _net_event(wiced_bool_t up, void *arg)
 
 wiced_result_t coap_daemon_init(void)
 {
+	wiced_rtos_init_semaphore(&semaphore);
 	a_network_register_callback(_net_event, 0);
 	if (a_network_is_up())
 		_net_event(WICED_TRUE, 0);
