@@ -90,6 +90,7 @@ static sys_pwm_t pwm_red;
 static wiced_worker_thread_t worker_thread;
 static eventloop_event_node_t event_update_interval;
 static eventloop_timer_node_t timer_sensor_node;
+static eventloop_timer_node_t timer_usb_detect_node;
 
 static charger_state_t state;
 
@@ -126,11 +127,15 @@ _err:
 }
 
 static void sensor_process(void *arg);
-static void usb_detect_fn(void *arg, wiced_bool_t on)
+static void usb_detect_delayed(void *arg)
 {
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
 
+	a_eventloop_deregister_timer(&evt, &timer_usb_detect_node);
 	if (state.test_process)
+		return;
+
+	if (state.usb == val)
 		return;
 
 	state.usb = val;
@@ -146,6 +151,11 @@ static void usb_detect_fn(void *arg, wiced_bool_t on)
 		wiced_rtos_send_asynchronous_event(&worker_thread, usb_post, 0);
 		sensor_process(0);
 	}
+}
+static void usb_detect_fn(void *arg, wiced_bool_t on)
+{
+	const uint32_t delay = 100;
+	a_eventloop_register_timer(&evt, &timer_usb_detect_node, usb_detect_delayed, delay, 0);
 }
 
 static wiced_result_t sensor_post(void *arg)
