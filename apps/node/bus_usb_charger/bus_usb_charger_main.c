@@ -251,10 +251,12 @@ static void init_state_info(void) {
 }
 
 void application_start(void) {
+	uint32_t ms;
 	wiced_result_t result;
 	WICED_LOG_LEVEL_T level = WICED_LOG_DEBUG0;
 
 	wiced_init();
+	a_init_srand();
 
 	init_state_info();
 	a_set_allow_fast_charge(true);
@@ -268,7 +270,6 @@ void application_start(void) {
 	wiced_assert("Console Init Error", result == WICED_SUCCESS);
 	console_add_cmd_table(cons_commands);
 
-	net_init();
 	a_dev_adc_init();
 	a_eventloop_init(&evt);
 	a_sys_led_init(&led, &evt, 500, gpio_table, N_ELEMENT(gpio_table));
@@ -278,16 +279,17 @@ void application_start(void) {
 	usb_detect_fn(0, 0);
 	sensor_process(0);
 	charging_test();
-
 	a_sys_button_init(&button, PLATFORM_BUTTON_1, &evt, EVENT_USB_DET, usb_detect_fn, (void*)0);
 
 	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
 	a_eventloop_register_event(&evt, &event_update_interval, update_interval, EVENT_CHANGE_INTERVAL, 0);
 	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, DEF_SENSING_INTERVAL, 0);
 		
+	ms = a_random_time_window(2000);
+	printf("Start USB Charger after %dms\n", (int)ms);
+	wiced_rtos_delay_milliseconds(ms);
+	net_init();
 	coap_daemon_init();
-
-	printf("Start USB Charger\n");
 
 	while (1) {
 		a_eventloop(&evt, WICED_WAIT_FOREVER);
