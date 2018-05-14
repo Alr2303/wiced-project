@@ -56,7 +56,7 @@ static const command_t cons_commands[] = {
         CMD_TABLE_END
 };
 
-#define DEF_SENSING_INTERVAL	(2 * 1000)
+#define DEF_SENSING_INTERVAL	(10 * 1000)
 #define CHARGING_TEST_INTERVAL	(3600*1000)
 
 #define EVENT_USB_DET		(1 << 0)
@@ -70,6 +70,12 @@ static const command_t cons_commands[] = {
 
 #define ERR_LOW_VOLTAGE		(1 << 0)
 #define ERR_USB_TEST		(1 << 1)
+
+#define REPORT_ALIVE		(1 << 0)
+#define REPORT_USB		(1 << 1)
+#define REPORT_POWER		(1 << 2)
+#define REPORT_FAIL		(1 << 3)
+#define REPORT_FASTCHARGE	(1 << 4)
 
 typedef enum {
 	LED_POWER,
@@ -95,6 +101,7 @@ static eventloop_timer_node_t timer_usb_detect_node;
 static charger_state_t state;
 
 static void update_interval(void *arg);
+static void sensor_process(void *arg);
 
 void net_init(void) {
 	app_dct_t* dct;
@@ -117,18 +124,37 @@ static int log_output_handler(WICED_LOG_LEVEL_T level, char *log_msg)
 	return 0;
 }
 
-static wiced_result_t usb_post(void *arg)
+static wiced_result_t coap_post_async(void *arg)
 {
-	if (a_network_is_up()) {
-		require_noerr(coap_post_int("usb", state.usb), _err);
+	int mask = (int)arg;
+
+	if (mask & REPORT_ALIVE) {
+		coap_post_alive(false);
 	}
-_err:
+	if (mask & REPORT_USB) {
+		coap_post_int("usb", state.usb);
+	}
+	if (mask & REPORT_POWER) {
+		coap_post_int("voltage", state.voltage);
+		coap_post_int("current", state.current);
+	}
+	if (mask & REPORT_FAIL) {
+		coap_post_int("fail", state.fail);
+	}
+	if (mask & REPORT_FASTCHARGE) {
+		coap_post_int("fastcharge", state.allow_fast_charge);
+	}
 	return WICED_SUCCESS;
 }
 
-static void sensor_process(void *arg);
+static void coap_post_trigger(int mask)
+{
+	wiced_rtos_send_asynchronous_event(&worker_thread, coap_post_async, (void*)mask);
+}
+
 static void usb_detect_delayed(void *arg)
 {
+	const int fast_report_interval = 1000;
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
 
 	a_eventloop_deregister_timer(&evt, &timer_usb_detect_node);
@@ -147,28 +173,14 @@ static void usb_detect_delayed(void *arg)
 		a_sys_pwm_level(&pwm_red, 0);
 	}
 
-	if (a_network_is_up()) {
-		wiced_rtos_send_asynchronous_event(&worker_thread, usb_post, 0);
-		sensor_process(0);
-	}
+	coap_post_trigger(REPORT_USB | REPORT_FASTCHARGE);
+	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, fast_report_interval, 0);
 }
+
 static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
 	const uint32_t delay = 100;
 	a_eventloop_register_timer(&evt, &timer_usb_detect_node, usb_detect_delayed, delay, 0);
-}
-
-static wiced_result_t sensor_post(void *arg)
-{
-	if (a_network_is_up()) {
-		require_noerr(coap_post_alive(false), _err);
-		require_noerr(coap_post_int("voltage", state.voltage), _err);
-		require_noerr(coap_post_int("current", state.current), _err);
-		require_noerr(coap_post_int("fail", state.fail), _err);
-		usb_post(0);
-	}
-_err:
-	return WICED_SUCCESS;
 }
 
 static void charging_test(void)
@@ -222,9 +234,8 @@ static void sensor_process(void *arg)
 		state.test_timeout = 0;
 	}
 
-	if (a_network_is_up()) {
-		wiced_rtos_send_asynchronous_event(&worker_thread, sensor_post, 0);
-	}
+	coap_post_trigger(REPORT_POWER | REPORT_FAIL | REPORT_ALIVE);
+	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, state.interval, 0);
 }
 
 static void init_state_info(void) {
@@ -232,6 +243,8 @@ static void init_state_info(void) {
 	app_dct_t* dct;
 
 	memset(&state, 0, sizeof(state));
+
+	state.interval = DEF_SENSING_INTERVAL;
 	wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
 			    0, sizeof(app_dct_t));
 	strncpy(state.server, dct->server, sizeof(state.server));
@@ -293,7 +306,7 @@ void application_start(void) {
 
 	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
 	a_eventloop_register_event(&evt, &event_update_interval, update_interval, EVENT_CHANGE_INTERVAL, 0);
-	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, DEF_SENSING_INTERVAL, 0);
+	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, state.interval, 0);
 		
 	ms = a_random_time_window(2000);
 	printf("Start USB Charger after %dms\n", (int)ms);
@@ -337,6 +350,8 @@ void a_set_allow_fast_charge(wiced_bool_t enable)
 	wiced_gpio_output_high(GPO_CHARGE_CONTROL);
 	wiced_rtos_delay_milliseconds(100);
 	wiced_gpio_output_low(GPO_CHARGE_CONTROL);
+
+	coap_post_trigger(REPORT_FASTCHARGE);
 }
 
 static void update_interval(void *arg)
