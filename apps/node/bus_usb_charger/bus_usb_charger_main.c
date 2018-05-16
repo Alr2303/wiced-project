@@ -273,6 +273,28 @@ static void init_state_info(void) {
 	}
 }
 
+/* FIXME: should be delete this in near future */
+static void fix_dct(void) {
+        app_dct_t* dct;
+
+        wiced_dct_read_lock((void**) &dct, WICED_FALSE, DCT_APP_SECTION,
+                            0, sizeof(app_dct_t));
+
+        if (strcmp(dct->server, "192.168.0.2") != 0) {
+                /* fixed ip address and erase device id */
+                wiced_dct_read_unlock(dct, WICED_FALSE);
+                wiced_dct_read_lock((void**) &dct, WICED_TRUE, DCT_APP_SECTION,
+                            0, sizeof(app_dct_t));
+
+                strcpy(dct->server, "192.168.0.2");
+                memset(dct->device_id, 0, sizeof(dct->device_id));
+                wiced_dct_write((const void*)dct, DCT_APP_SECTION, 0, sizeof(app_dct_t));
+                wiced_dct_read_unlock(dct, WICED_TRUE);
+        } else {
+                wiced_dct_read_unlock(dct, WICED_FALSE);
+        }
+}
+
 void application_start(void) {
 	uint32_t ms;
 	wiced_result_t result;
@@ -281,6 +303,7 @@ void application_start(void) {
 	wiced_init();
 	a_init_srand();
 
+	fix_dct();
 	init_state_info();
 	a_set_allow_fast_charge(true);
 
