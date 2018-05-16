@@ -54,7 +54,7 @@ const static int port[MAX_PORT] = {
 	BUSGW_GPO_P2_POWER,
 	BUSGW_GPO_P3_POWER,
 	BUSGW_GPO_P4_POWER,
-	BUSGW_GPO_USB_POWER
+	BUSGW_GPO_AP_POWER
 };
 
 static wiced_uart_config_t uart_app_config =
