@@ -152,7 +152,7 @@ static void coap_post_trigger(int mask)
 	wiced_rtos_send_asynchronous_event(&worker_thread, coap_post_async, (void*)mask);
 }
 
-static void usb_detect_delayed(void *arg)
+static void usb_detect_delayed(wiced_bool_t force)
 {
 	const int fast_report_interval = 1000;
 	int val = !wiced_gpio_input_get(GPIO_BUTTON_USB_DETECT); /* low active */
@@ -161,7 +161,7 @@ static void usb_detect_delayed(void *arg)
 	if (state.test_process)
 		return;
 
-	if (state.usb == val)
+	if (!force && state.usb == val)
 		return;
 
 	state.usb = val;
@@ -180,7 +180,7 @@ static void usb_detect_delayed(void *arg)
 static void usb_detect_fn(void *arg, wiced_bool_t on)
 {
 	const uint32_t delay = 100;
-	a_eventloop_register_timer(&evt, &timer_usb_detect_node, usb_detect_delayed, delay, 0);
+	a_eventloop_register_timer(&evt, &timer_usb_detect_node, (eventloop_timer_fn)usb_detect_delayed, delay, 0);
 }
 
 static void charging_test(void)
@@ -306,6 +306,7 @@ void application_start(void) {
 
 	wiced_rtos_create_worker_thread(&worker_thread, WICED_DEFAULT_WORKER_PRIORITY, 4096, 2);
 	a_eventloop_register_event(&evt, &event_update_interval, update_interval, EVENT_CHANGE_INTERVAL, 0);
+	usb_detect_delayed(WICED_TRUE);
 	a_eventloop_register_timer(&evt, &timer_sensor_node, sensor_process, state.interval, 0);
 		
 	ms = a_random_time_window(2000);
