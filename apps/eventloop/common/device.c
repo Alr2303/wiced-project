@@ -39,10 +39,10 @@ static wiced_result_t temp_humid_init(void)
 	wiced_i2c_init(&temp_i2c_device);
 	wiced_i2c_init_tx_message(&message, data_out_break, sizeof(data_out_break), 3, 1);
 	status = wiced_i2c_transfer(&temp_i2c_device, &message, 1);
-	wiced_rtos_delay_milliseconds(1);
+	wiced_rtos_delay_milliseconds(10);
 	wiced_i2c_init_tx_message(&message, data_out, sizeof(data_out), 3, 1);
 	status = wiced_i2c_transfer(&temp_i2c_device, &message, 1);
-	wiced_rtos_delay_milliseconds(1);
+	wiced_rtos_delay_milliseconds(10);
 	if (status != WICED_SUCCESS)
 		wiced_log_msg(WLF_DEF, WICED_LOG_ERR, "Fail with temp & humidity: %d\n", status);
 	return status;
@@ -121,6 +121,7 @@ wiced_result_t a_dev_temp_humid_init(void)
 	if ((result = temp_humid_init()) != WICED_SUCCESS)
 		return result;
 
+	wiced_rtos_delay_milliseconds(10);
 	result = a_dev_temp_humid_measure_periodic_start();
 	return result;
 }
