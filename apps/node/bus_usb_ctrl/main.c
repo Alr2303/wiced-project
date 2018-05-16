@@ -169,10 +169,13 @@ void application_start(void)
 	a_dev_adc_init();
 	fill_adc();
 
+	wiced_rtos_delay_milliseconds(1000);
+
 	/* turn on */
 	for (i = 0; i < MAX_PORT; i++) {
 		wiced_gpio_output_high(port[i]);
 		on[i] = WICED_TRUE;
+		wiced_rtos_delay_milliseconds(300);
 	}
 
 	for (cnt = 0; ; cnt++) {
