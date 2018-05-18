@@ -39,7 +39,7 @@
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
 
-#define VERSION 0.0.5
+#define VERSION 0.0.6
 
 const char* fw_version = EXPAND_AND_QUOTE(VERSION);
 const char* fw_model = "USB-CHARGER";
