@@ -229,9 +229,10 @@ wiced_result_t coap_daemon_init(void)
 	return WICED_SUCCESS;
 }
 
-#define HANDLE_RESPONSE(data) handle_response(context, service, request, data)
+#define HANDLE_RESPONSE(data) handle_response(context, service, request, data, COAP_RSPCODE_NONE)
+#define HANDLE_RESPONSE_WITH_CODE(data, code) handle_response(context, service, request, data, code)
 static wiced_result_t handle_response(void* context, wiced_coap_server_service_t* service, wiced_coap_server_request_t* request,
-				      const char* data)
+				      const char* data, coap_responsecode_t response_code)
 {
 	wiced_coap_server_response_t response;
 	wiced_coap_notification_type type = WICED_COAP_NOTIFICATION_TYPE_NONE;
@@ -292,7 +293,7 @@ static wiced_result_t handle_update(void* context, wiced_coap_server_service_t* 
 {
 	if (request->method == WICED_COAP_METHOD_PUT) {
 		a_upgrade_request((char*)request->payload.data, request->payload.len);
-		return HANDLE_RESPONSE("OK");
+		return HANDLE_RESPONSE_WITH_CODE("OK", COAP_RSPCODE_VALID);
 	} else {
 		return handle_version(context, service, request);
 	}
