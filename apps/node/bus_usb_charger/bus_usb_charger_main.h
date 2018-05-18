@@ -10,6 +10,8 @@
 
 #include "app_dct.h"
 
+#define MD5_LENGTH	16
+
 typedef struct {
 	char server[MAX_SERVER_NAME];
 	char id[MAX_DEVICE_ID];
@@ -27,7 +29,7 @@ typedef struct {
 typedef struct {
 	char hostname[128];
 	char path[256];
-	char md5[16 * 2];
+	char md5[MD5_LENGTH * 2 + 4];
 	int port;
 } update_info_t;
 
