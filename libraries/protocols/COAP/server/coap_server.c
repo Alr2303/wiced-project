@@ -872,9 +872,8 @@ static wiced_result_t coap_internal_send_response( void* context, wiced_coap_ser
     return WICED_SUCCESS;
 }
 
-wiced_result_t wiced_coap_server_send_response( void* context, wiced_coap_server_service_t* service, void* req_handle, wiced_coap_server_response_t* response, wiced_coap_notification_type notification_type )
+wiced_result_t wiced_coap_server_send_response_ex( void* context, wiced_coap_server_service_t* service, void* req_handle, wiced_coap_server_response_t* response, wiced_coap_notification_type notification_type, coap_responsecode_t response_code )
 {
-    coap_responsecode_t response_code = COAP_RSPCODE_NONE;
     wiced_coap_option_t* option = NULL;
     coap_observer_t* observer = NULL;
     coap_request_info_t* request = (coap_request_info_t*) req_handle;
@@ -899,6 +898,12 @@ wiced_result_t wiced_coap_server_send_response( void* context, wiced_coap_server
 
     coap_internal_send_response( context, service, req_handle, response, response_code, notification_type, WICED_TRUE );
     return WICED_SUCCESS;
+}
+
+wiced_result_t wiced_coap_server_send_response( void* context, wiced_coap_server_service_t* service, void* req_handle, wiced_coap_server_response_t* response, wiced_coap_notification_type notification_type )
+{
+    coap_responsecode_t response_code = COAP_RSPCODE_NONE;
+    return wiced_coap_server_send_response_ex(context, service, req_handle, response, notification_type, response_code);
 }
 
 static wiced_result_t coap_timed_event( void *arg )

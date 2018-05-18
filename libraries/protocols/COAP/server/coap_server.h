@@ -157,6 +157,19 @@ wiced_result_t wiced_coap_server_delete_service( wiced_coap_server_t* server, wi
  */
 wiced_result_t wiced_coap_server_send_response( void* server, wiced_coap_server_service_t* service, void* req_handle, wiced_coap_server_response_t* response, wiced_coap_notification_type notification_type );
 
+/** Send response back to COAP client with response_code
+ *
+ * @param server[in]            : server instance to be used to send response
+ * @param service [in]          : service object to be used to send response
+ * @param req_handle [in]       : request handle
+ * @param response [in]         : Response that will be sent from callback
+ * @param notification_type[in] : Notification type
+ * @param response_code[in]     : Response code
+ *
+ *  @return @ref wiced_result_t
+ */
+wiced_result_t wiced_coap_server_send_response_ex( void* context, wiced_coap_server_service_t* service, void* req_handle, wiced_coap_server_response_t* response, wiced_coap_notification_type notification_type, coap_responsecode_t response_code );
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
