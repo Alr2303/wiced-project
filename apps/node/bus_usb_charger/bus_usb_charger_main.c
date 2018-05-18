@@ -99,6 +99,7 @@ static eventloop_timer_node_t timer_sensor_node;
 static eventloop_timer_node_t timer_usb_detect_node;
 
 static charger_state_t state;
+static wiced_bool_t upgrading;
 
 static void update_interval(void *arg);
 static void sensor_process(void *arg);
@@ -405,11 +406,20 @@ static wiced_result_t upgrade_worker(void *arg)
 	if (!a_network_is_up())
 		return WICED_SUCCESS;
 
+	upgrading = WICED_TRUE;
+	coap_post_str("version", "upgrading...");
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Start Upgrade\n");
 	res = a_upgrade_try(WICED_FALSE, info->hostname, info->port, info->path, info->md5, WICED_TRUE);
 	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Upgrade Result: %d\n", res);
-
+	if (res == OTA_SUCCESS) {
+		coap_post_str("version", "rebooting...");
+		wiced_rtos_delay_milliseconds(2000);
+		wiced_framework_reboot();
+	} else {
+		coap_post_str("version", "fail");
+	}
 	free(info);
+	upgrading = WICED_FALSE;
 	return WICED_SUCCESS;
 }
 
@@ -420,6 +430,9 @@ wiced_result_t a_upgrade_request(char* json_data, size_t len)
 	int entry[14];
 	update_info_t* info = NULL;
 	char* buf = NULL;
+
+	if (upgrading)
+		return WICED_ERROR;
 
 	info = malloc(sizeof(update_info_t));
 	buf = malloc(len + 1);
