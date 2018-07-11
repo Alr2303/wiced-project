@@ -4,6 +4,7 @@ COMMON := ../../eventloop/common
 LOCAL_COMMON := ../common
 
 $(NAME)_SOURCES    := main.c \
+			ctrl_console.c \
 			$(COMMON)/console.c \
 			$(COMMON)/device.c
 
