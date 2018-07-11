@@ -46,12 +46,13 @@ int on_mask[MAX_SWITCH];
 int on[MAX_SWITCH];
 int temperature;
 int humidity;
+wiced_bool_t low_battery;
 
 void apply_switch(wiced_bool_t slow)
 {
 	int i;
 	for (i = 0; i < MAX_SWITCH; i++) {
-		if (on_mask[i] || !on[i])
+		if (low_battery || on_mask[i] || !on[i])
 			wiced_gpio_output_low(port[i]);
 		else
 			wiced_gpio_output_high(port[i]);
@@ -81,6 +82,42 @@ static void read_adc(void)
 		voltage[i] = (float)adc_avg[i] / 112;
 		current[i] = (float)adc_avg[i + MAX_PORT] / 260;
 	}
+}
+
+static void limit_abnormal_power(void)
+{
+	int i;
+	wiced_bool_t changed = WICED_FALSE;
+	float max_voltage = -1;
+	wiced_time_t now;
+
+	for (i = 0; i < MAX_PORT; i++) {
+		if (voltage[i] > max_voltage)
+			max_voltage = voltage[i];
+	}
+
+#if 1
+	/* start checking after 60s */
+	wiced_time_get_time(&now);
+	if (now > 60 * 1000 && !low_battery && max_voltage < 21.) {
+		/* low battery, power off all port */
+		wiced_log_msg(WLF_DEF, WICED_LOG_ERR, "Low Battery: %.1f V\n", max_voltage);
+		low_battery = WICED_TRUE;
+		changed = WICED_TRUE;
+	}
+#endif
+
+	for (i = 0; i < MAX_PORT; i++) {
+		if (current[i] > 9.) {
+			/* over current */
+			wiced_log_msg(WLF_DEF, WICED_LOG_ERR, "Over current port %d: %.2f A\n", i, current[i]);
+			on_mask[i] = WICED_TRUE;
+			changed = WICED_TRUE;
+		}
+	}
+
+	if (changed)
+		apply_switch(WICED_FALSE);
 }
 
 static int log_output_handler(WICED_LOG_LEVEL_T level, char *log_msg)
@@ -116,6 +153,9 @@ void application_start(void)
 	for (cnt = 0; ; cnt++) {
 		/* read adc 4 times per sec */
 		read_adc();
+		limit_abnormal_power();
+		if (low_battery)
+			break;
 
 		/* read temperature and humidy every 2 sec */
 		if (cnt % 8 == 0) {
@@ -132,6 +172,11 @@ void application_start(void)
 			humidity = v;
 		}
 		wiced_rtos_delay_milliseconds(260);
+	}
+
+	wiced_log_msg(WLF_DEF, WICED_LOG_INFO, "Stop all sensing...\n");
+	while (1) {
+		wiced_rtos_delay_milliseconds(10000);
 	}
 }
 

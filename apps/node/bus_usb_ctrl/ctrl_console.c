@@ -157,6 +157,7 @@ static int cmd_switch_mask(int argc, char* argv[])
 
 static int cmd_read(int argc, char* argv[])
 {
+	printf("Low battery: %s\n", low_battery ? "TRUE" : "FALSE");
 	printf("Voltage: %.1f %.1f %.1f %.1f\n", voltage[0], voltage[1], voltage[2], voltage[3]);
 	printf("Current: %.2f %.2f %.2f %.2f\n", current[0], current[1], current[2], current[3]);
 	printf("Voltage Raw: %d %d %d %d\n", adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3]);

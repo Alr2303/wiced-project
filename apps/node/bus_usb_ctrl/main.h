@@ -21,6 +21,6 @@ extern int on_mask[MAX_SWITCH];
 extern int on[MAX_SWITCH];
 extern int temperature;
 extern int humidity;
-
+extern wiced_bool_t low_battery;
 
 void apply_switch(wiced_bool_t slow);
