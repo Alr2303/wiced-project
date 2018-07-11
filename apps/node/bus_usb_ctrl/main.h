@@ -8,6 +8,19 @@
  */
 #pragma once
 
+#define MAX_PORT	4
+#define MAX_SWITCH	5
+
 extern const char* fw_version;
 extern const char* fw_model;
 
+extern int adc_avg[WICED_ADC_MAX];
+extern float voltage[MAX_PORT];
+extern float current[MAX_PORT];
+extern int on_mask[MAX_SWITCH];
+extern int on[MAX_SWITCH];
+extern int temperature;
+extern int humidity;
+
+
+void apply_switch(wiced_bool_t slow);

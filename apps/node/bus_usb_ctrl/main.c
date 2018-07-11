@@ -12,6 +12,7 @@
 
 #include "assert_macros.h"
 #include "device.h"
+#include "main.h"
 #include "ctrl_console.h"
 
 #include <unistd.h>
@@ -27,11 +28,10 @@ const char* fw_model = "BUS-USB-CTRL";
 
 #define UART_RX_BUFFER_SIZE 256
 
-#define MAX_PORT	5
 #define AVG_ALPHA	0.33 	/* N=5, smoothing factor = 2 / (1 + N)  */
 
 
-const static int port[MAX_PORT] = {
+const static int port[MAX_SWITCH] = {
 	BUSGW_GPO_P1_POWER,
 	BUSGW_GPO_P2_POWER,
 	BUSGW_GPO_P3_POWER,
@@ -39,10 +39,27 @@ const static int port[MAX_PORT] = {
 	BUSGW_GPO_AP_POWER
 };
 
-static int adc_avg[WICED_ADC_MAX];
-static int on[MAX_PORT];
-static int temperature;
-static int humidity;
+int adc_avg[WICED_ADC_MAX];
+float voltage[MAX_PORT];
+float current[MAX_PORT];
+int on_mask[MAX_SWITCH];
+int on[MAX_SWITCH];
+int temperature;
+int humidity;
+
+void apply_switch(wiced_bool_t slow)
+{
+	int i;
+	for (i = 0; i < MAX_SWITCH; i++) {
+		if (on_mask[i] || !on[i])
+			wiced_gpio_output_low(port[i]);
+		else
+			wiced_gpio_output_high(port[i]);
+
+		if (slow)
+			wiced_rtos_delay_milliseconds(200);
+	}
+}
 
 static void fill_adc(void)
 {
@@ -58,6 +75,11 @@ static void read_adc(void)
 	for (i = 0; i < WICED_ADC_MAX; i++) {
 		int v = (int)a_dev_adc_get(WICED_ADC_1 + i);
 		adc_avg[i] = (int)(v * AVG_ALPHA + adc_avg[i] * (1 - AVG_ALPHA));
+	}
+
+	for (i = 0; i < MAX_PORT; i++) {
+		voltage[i] = (float)adc_avg[i] / 112;
+		current[i] = (float)adc_avg[i + MAX_PORT] / 260;
 	}
 }
 
@@ -85,18 +107,18 @@ void application_start(void)
 	wiced_rtos_delay_milliseconds(1000);
 
 	/* turn on */
-	for (i = 0; i < MAX_PORT; i++) {
-		wiced_gpio_output_high(port[i]);
+	for (i = 0; i < MAX_SWITCH; i++) {
 		on[i] = WICED_TRUE;
-		wiced_rtos_delay_milliseconds(300);
+		on_mask[i] = WICED_FALSE;
 	}
+	apply_switch(WICED_TRUE);
 
 	for (cnt = 0; ; cnt++) {
 		/* read adc 4 times per sec */
 		read_adc();
 
-		/* read temperature and humidy every sec */
-		if (cnt % 4 == 0) {
+		/* read temperature and humidy every 2 sec */
+		if (cnt % 8 == 0) {
 			float t, h;
 			int v;
 			a_dev_temp_humid_get(&t, &h);

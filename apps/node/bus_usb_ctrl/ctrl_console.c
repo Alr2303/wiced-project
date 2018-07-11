@@ -19,7 +19,7 @@
 
 #define DEV_UART APP_UART
 #define MAX_CONSOLE_LINE  30
-#define MAX_ARGC  5
+#define MAX_ARGC  10
 #define UART_RX_BUFFER_SIZE 64
 
 #define DEV_CONSOLE_THREAD_STACK_SIZE (3*1024)
@@ -42,6 +42,20 @@ static int console_pos = 0;
 #define MAX_COMMAND_LENGTH      (180)
 static char command_buffer[MAX_COMMAND_LENGTH];
 static char command_history_buffer[MAX_COMMAND_LENGTH * COMMAND_HISTORY_LENGTH];
+
+static void puts_err(int uart) {
+	static const char* err = "ERR\r\n";
+	platform_stdio_tx_lock();
+        wiced_uart_transmit_bytes(uart, err, strlen(err));
+	platform_stdio_tx_unlock();
+}
+
+static void puts_ok(int uart) {
+	static const char* ok = "OK\r\n";
+	platform_stdio_tx_lock();
+        wiced_uart_transmit_bytes(uart, ok, strlen(ok));
+	platform_stdio_tx_unlock();
+}
 
 static wiced_uart_config_t uart_app_config =
 {
@@ -94,43 +108,120 @@ static int dev_cmd_version(int argc, char* argv[])
 	return ERR_CMD_OK;
 }
 
-static int cmd_set(int argc, char* argv[])
+static wiced_result_t _switch_set(int uart, int argc, char* argv[])
 {
-	/* int i; */
-	/* int len; */
-	/* char buf[128]; */
-	/* if (argc < 6) */
-	/* 	return ERR_INSUFFICENT_ARGS; */
+	int i;
+	if (argc < 6) {
+		puts_err(uart);
+		return ERR_INSUFFICENT_ARGS;
+	}
 
-	/* for (i = 0; i < MAX_PORT; i++) { */
-	/* 	if (argv[i+1][0] == '1') { */
-	/* 		on[i] = 1; */
-	/* 		wiced_gpio_output_high(port[i]); */
-	/* 	} else { */
-	/* 		on[i] = 0; */
-	/* 		wiced_gpio_output_low(port[i]); */
-	/* 	} */
-	/* } */
-
-	/* len = sprintf(buf, "%d %d %d %d %d\r\n", on[0], on[1], on[2], on[3], on[4]); */
-	/* platform_stdio_tx_lock(); */
-        /* wiced_uart_transmit_bytes(CONSOLE_UART, buf, len); */
-	/* platform_stdio_tx_unlock(); */
+	for (i = 0; i < MAX_PORT; i++) {
+		on[i] = (argv[i+1][0] == '1') ? 1 : 0;
+	}
+	apply_switch(WICED_FALSE);
+	puts_ok(uart);
 	return ERR_CMD_OK;
+}
+
+static int cmd_switch_set(int argc, char* argv[])
+{
+	return _switch_set(STDIO_UART, argc, argv);
+}
+
+static int dev_switch_set(int argc, char* argv[])
+{
+	return _switch_set(DEV_UART, argc, argv);
+}
+
+static wiced_result_t _switch_mask(int uart, int argc, char* argv[])
+{
+	int i;
+	if (argc < 6) {
+		puts_err(uart);
+		return ERR_INSUFFICENT_ARGS;
+	}
+
+	for (i = 0; i < MAX_PORT; i++) {
+		on_mask[i] = (argv[i+1][0] == '1') ? 1 : 0;
+	}
+	apply_switch(WICED_FALSE);
+	puts_ok(uart);
+	return ERR_CMD_OK;
+}
+
+static int cmd_switch_mask(int argc, char* argv[])
+{
+	return _switch_mask(STDIO_UART, argc, argv);
 }
 
 static int cmd_read(int argc, char* argv[])
 {
-	/* int len; */
-	/* char buf[256]; */
+	printf("Voltage: %.1f %.1f %.1f %.1f\n", voltage[0], voltage[1], voltage[2], voltage[3]);
+	printf("Current: %.2f %.2f %.2f %.2f\n", current[0], current[1], current[2], current[3]);
+	printf("Voltage Raw: %d %d %d %d\n", adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3]);
+	printf("Current Raw: %d %d %d %d\n", adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]);
+	printf("Temperature: %d\n", temperature);
+	printf("Humidity: %d\n", humidity);
+	printf("On: %d %d %d %d %d\n", on[0], on[1], on[2], on[3], on[4]);
+	printf("On Mask: %d %d %d %d %d\n", on_mask[0], on_mask[1], on_mask[2], on_mask[3], on_mask[4]);
+	return ERR_CMD_OK;
+}
 
-	/* len = sprintf(buf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\r\n", */
-	/* 	      temperature, humidity, on[0], on[1], on[2], on[3], on[4], */
-	/* 	      adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3], */
-	/* 	      adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]); */
-	/* platform_stdio_tx_lock(); */
-        /* wiced_uart_transmit_bytes(CONSOLE_UART, buf, len); */
-	/* platform_stdio_tx_unlock(); */
+static int dev_read(int argc, char* argv[])
+{
+	char buf[64];
+	sprintf(buf, "%.1f %.1f %.1f %.1f %.2f %.2f %.2f %.2f\r\n",
+		voltage[0], voltage[1], voltage[2], voltage[3],
+		current[0], current[1], current[2], current[3]);
+	platform_stdio_tx_lock();
+        wiced_uart_transmit_bytes(DEV_UART, buf, strlen(buf));
+	platform_stdio_tx_unlock();
+	return ERR_CMD_OK;
+}
+
+static int dev_read_raw(int argc, char* argv[])
+{
+	char buf[64];
+	sprintf(buf, "%d %d %d %d %d %d %d %d\r\n",
+		adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3], adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]);
+	platform_stdio_tx_lock();
+        wiced_uart_transmit_bytes(DEV_UART, buf, strlen(buf));
+	platform_stdio_tx_unlock();
+	return ERR_CMD_OK;
+}
+
+static int dev_port(int argc, char* artv[])
+{
+	char buf[64];
+	sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\r\n",
+		on_mask[0], on_mask[1], on_mask[2], on_mask[3], on_mask[4], on[0], on[1] ,on[2], on[3], on[4]);
+	platform_stdio_tx_lock();
+        wiced_uart_transmit_bytes(DEV_UART, buf, strlen(buf));
+	platform_stdio_tx_unlock();
+	return ERR_CMD_OK;
+	
+}
+
+static void _reset_ap(int uart)
+{
+	on_mask[MAX_SWITCH-1] = 1;
+	apply_switch(WICED_FALSE);
+	wiced_rtos_delay_milliseconds(1000);
+	on_mask[MAX_SWITCH-1] = 0;
+	apply_switch(WICED_FALSE);
+	puts_ok(uart);
+}
+
+static int cmd_reset_ap(int argc, char* argv[])
+{
+	_reset_ap(STDIO_UART);
+	return ERR_CMD_OK;
+}
+
+static int dev_reset_ap(int argc, char* argv[])
+{
+	_reset_ap(DEV_UART);
 	return ERR_CMD_OK;
 }
 
@@ -138,14 +229,21 @@ static const command_t cons_commands[] = {
 	{"hello", cmd_hello, 0, NULL, NULL, NULL, "Hello:"},
 	{"version", cmd_version, 0, NULL, NULL, NULL, "Read Version"},
 	{"read", cmd_read, 0, NULL, NULL, NULL, "Read All Value"} ,
-	{"set", cmd_set, 5, NULL, NULL, "each port", "Set Power Control"},
-	{ "reboot", cmd_reboot, 0, NULL, NULL, NULL, "Reboot" },
+	{"mask", cmd_switch_mask, 5, NULL, NULL, "each port", "Set make of switch"},
+	{"set", cmd_switch_set, 5, NULL, NULL, "each port", "Set Power Control"},
+	{"reset_ap", cmd_reset_ap, 0, NULL, NULL, NULL, "Reset AP"},
+	{"reboot", cmd_reboot, 0, NULL, NULL, NULL, "Reboot"},
 	CMD_TABLE_END
 };
 
 static const dev_command_t dev_cons_commands[] = {
 	{"hello", dev_cmd_hello, 0},
 	{"version", dev_cmd_version, 0},
+	{"set", dev_switch_set, 5},
+	{"reset_ap", dev_reset_ap, 0},
+	{"read", dev_read, 0},
+	{"read_raw", dev_read_raw, 0},
+	{"port", dev_port, 0},
 };
 
 /*
@@ -157,7 +255,6 @@ static void run_command(void)
 	int i;
 	int argc_pos;
 	char* argv[MAX_ARGC+1];
-	static const char* err = "ERR\r\n";
 
 	memset(argv, 0, sizeof(argv));
 	check(console_pos <= MAX_CONSOLE_LINE);
@@ -187,7 +284,7 @@ static void run_command(void)
 	return;
 		
 bad_param:
-        wiced_uart_transmit_bytes(DEV_UART, err, strlen(err));
+	puts_err(DEV_UART);
 	console_pos = 0;
 	return;
 }
