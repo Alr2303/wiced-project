@@ -172,9 +172,10 @@ static int cmd_read(int argc, char* argv[])
 static int dev_read(int argc, char* argv[])
 {
 	char buf[64];
-	sprintf(buf, "%.1f %.1f %.1f %.1f %.2f %.2f %.2f %.2f\r\n",
+	sprintf(buf, "%.1f %.1f %.1f %.1f %.2f %.2f %.2f %.2f %d %d\r\n",
 		voltage[0], voltage[1], voltage[2], voltage[3],
-		current[0], current[1], current[2], current[3]);
+		current[0], current[1], current[2], current[3],
+		temperature, humidity);
 	platform_stdio_tx_lock();
         wiced_uart_transmit_bytes(DEV_UART, buf, strlen(buf));
 	platform_stdio_tx_unlock();
@@ -184,8 +185,10 @@ static int dev_read(int argc, char* argv[])
 static int dev_read_raw(int argc, char* argv[])
 {
 	char buf[64];
-	sprintf(buf, "%d %d %d %d %d %d %d %d\r\n",
-		adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3], adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7]);
+	sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\r\n",
+		adc_avg[0], adc_avg[1], adc_avg[2], adc_avg[3],
+		adc_avg[4], adc_avg[5], adc_avg[6], adc_avg[7],
+		temperature, humidity);
 	platform_stdio_tx_lock();
         wiced_uart_transmit_bytes(DEV_UART, buf, strlen(buf));
 	platform_stdio_tx_unlock();
