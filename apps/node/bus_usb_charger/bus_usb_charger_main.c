@@ -56,7 +56,7 @@ static const command_t cons_commands[] = {
         CMD_TABLE_END
 };
 
-#define DEF_SENSING_INTERVAL	(10 * 1000)
+#define DEF_SENSING_INTERVAL	(30 * 1000)
 #define CHARGING_TEST_INTERVAL	(3600*1000)
 
 #define EVENT_USB_DET		(1 << 0)
