@@ -21,7 +21,7 @@
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
 
-#define VERSION 0.0.4
+#define VERSION 0.0.5
 
 const char* fw_version = EXPAND_AND_QUOTE(VERSION);
 const char* fw_model = "BUS-USB-CTRL";
